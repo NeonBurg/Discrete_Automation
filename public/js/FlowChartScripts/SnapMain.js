@@ -24,10 +24,26 @@ var rectList = [];
 // -----------------------------------
 
 
-
+var zero_state_node = null;
 
 
 // ---------------- Функции для создания графики -------------------
+
+// Верхний блок меню с выбором инструмента
+function createToolsMenuBlock() {
+    var menuBlock = snap.rect(leftSide_w + 0.5, 0.5, scr_w - leftSide_w - 1, 40).attr({
+        fill: "#d2d2d2",
+        strokeWidth: 0.5,
+        stroke: "#000"
+    });
+    var arrow_img = snap.image("/img/arrow.svg", leftSide_w + 10, 5, 30, 30).attr({id: "arrowTool"});
+    var connect_img = snap.image("/img/connection.svg", leftSide_w + 60, 5, 30, 30).attr({id: "connectTool"});
+    var save_img = snap.image("/img/save.svg", leftSide_w + 110, 5, 30, 30).attr({id: "saveTool"});
+    arrow_img.click(controller.toolClicked);
+    connect_img.click(controller.toolClicked);
+    save_img.click(controller.toolClicked);
+    controller.chooseTool(0);
+}
 
 // Левая сторона со списком инструментов
 function createLeftToolsMenu() {
@@ -49,20 +65,23 @@ function createAutomationElement(_elementBefore) {
         stroke: '#000',
         strokeWidth: 2,
         id: 'Graph_1',
-    });
-    var node_text = snap.text(cx-4, cy+4, "a").addClass("nodeTitle");;
+    }).addClass("nodeCircle");
+    var node_text = snap.text(cx-4, cy+4, "a").addClass("nodeTitle");
+
+    //console.log('create element ' + DiagramModel.getCountDiagrams() + ': ' + graph_node.id);
 
     var ngroup = snap.group();
     ngroup.add(graph_node, node_text);
     ngroup.attr({class: 'draggable'});
     ngroup.drag(controller.moveDiagram, controller.startMoveDiagram, controller.stopMoveDiagram);
+    //ngroup.mouseover(controller.mouseoverConn);
+    //ngroup.mouseout(controller.mouseoutConn);
 
     //graph_node.drag(controller.moveDiagram, controller.startMoveDiagram, controller.stopMoveDiagram);
 
     if(_elementBefore) {
         _elementBefore.insertAfter(ngroup);
     }
-
 }
 
 // -----------------------------------------------------------------
@@ -81,10 +100,9 @@ for (var i = 0; i < vertLinesAmount; i++) {
     var x1 = i * cellSize + leftSide_w;
     var vertLine = snap.line(x1, 0, x1, scr_h * 2).attr({stroke: "#d2d2d2", strokeWidth: 1});
 }
-
+createToolsMenuBlock();
 createLeftToolsMenu();
 createAutomationElement();
-
 
 // Первый элемент блок схем (начало алгоритма)
 //createStartAlgoRect();
@@ -92,3 +110,15 @@ createAutomationElement();
 //createSimpleRect();
 
 // ------------------------------------------------------------------------------------
+
+
+/*var circle = snap.circle(200, 300, 100).attr({fill:'#ffffff', stroke: '#000'});
+var circle2 = snap.circle(300, 400, 100).attr({fill:'#ffffff', stroke: '#000'});
+
+var ngroup2 = snap.group();
+ngroup2.add(circle, circle2);
+
+var path = "M" + 50 + "," + 50 + "," + 500 + "," + 500;
+//var line = ngroup2.insertAfter(snap.path(path).attr({stroke: '#000', fill: "none"}));
+var line = snap.path(path).attr({stroke: '#000', fill: "none"}).insertBefore(circle);*/
+

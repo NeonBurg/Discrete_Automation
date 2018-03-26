@@ -32,6 +32,14 @@ var DiagramModel = {
         return this.data[this.id_list[_index]];
     },
 
+    getIndexByDrawableId: function(_drawableId) {
+        for(var i=0; i<this.id_list.length; i++) {
+            if(this.id_list[i] == _drawableId) {
+                return i;
+            }
+        }
+    },
+
     getAllData: function() {
         return this.data;
     },
@@ -74,6 +82,7 @@ var DiagramModel = {
     removeDiagramByIndex: function(_index) {
         this.drawable[this.id_list[_index]].remove();
         this.drawable[this.id_list[_index]] = null;
+        this.id_list[_index] = null;
         //this.id_list.splice(_index, 1);
     },
 
