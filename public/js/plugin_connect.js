@@ -136,6 +136,51 @@ Snap.plugin(function (Snap, Element, Paper, global) {
         }
     }
 
+
+
+    //Создаем двхстороннею связь
+    Paper.prototype.split_double_connections = function (conn_from, conn_to) {
+
+        console.log('split_connections');
+
+        var line = conn_from.line;
+        var obj_from = conn_from.from;
+        var obj_to = conn_from.to;
+
+        var x1 = obj_from.getTransformedBBox().cx;
+        var y1 = obj_from.getTransformedBBox().cy+5;
+
+        var x4 = obj_to.getTransformedBBox().cx;
+        var y4 = obj_to.getTransformedBBox().cy+5;
+
+        var full_length = vectorLength(x1,y1,x4,y4);
+        var radius = 30;
+        var radius2 = 45;
+
+        var new_x = x4 + (x1-x4) * (radius/full_length);
+        var new_y = y4 + (y1-y4) * (radius/full_length);
+        var new_x2 = x4 + (x1-x4) * (radius2/full_length);
+        var new_y2 = y4 + (y1-y4) * (radius2/full_length);
+
+        var rotated_point1 = rotateV2AroundPount(new_x2, new_y2, 20, new_x, new_y);
+        var rotated_point2 = rotateV2AroundPount(new_x2, new_y2, -20, new_x, new_y);
+
+        var path = "M" + x1.toFixed(3) + "," + y1.toFixed(3) + "," + x4.toFixed(3) + "," + y4.toFixed(3);
+
+        var path_arrow1 = "M" + rotated_point1.x + "," + rotated_point1.y + "," + new_x + "," + new_y;
+        var path_arrow2 = "M" + rotated_point2.x + "," + rotated_point2.y + "," + new_x + "," + new_y;
+
+        line.attr({path: path});
+        conn_from.arrow_line1.attr({path: path_arrow1}).attr({stroke:'#000', strokeWidth:1});
+        conn_from.arrow_line2.attr({path: path_arrow2}).attr({stroke:'#000', strokeWidth:1});
+
+    }
+
+
+
+
+    // -------------- Математические методы ---------------
+
     // Длина вектора |V|
     function vectorLength(vx1, vy1, vx2, vy2) {
         return Math.sqrt(Math.pow(vx1 - vx2, 2) + Math.pow(vy1 - vy2, 2));
