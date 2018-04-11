@@ -224,6 +224,31 @@ function Controller() {
             var drawable_from = DiagramModel.getDrawableByIndex(node_from);
             var drawable_to = DiagramModel.getDrawableByIndex(node_to);
 
+            console.log('add connect from: ' + drawable_from.id + ' | connIndex = ' + connections.length);
+            DiagramModel.addConnect2(drawable_from.id, drawable_to.id, connections.length);
+
+            var node_data = DiagramModel.getDataByIndex(node_to);
+            console.log('drawable_from data: ' + JSON.stringify(node_data));
+
+            // Проверка создания противоположенно направленных связей между узлами
+            /*var connectsToArr = node_data.connectsTo;
+            for(var i=0; i<connectsToArr.length; i++) {
+                if(connectsToArr[i] === node_from) {
+                    console.log('connectsToArr[i]: ' + connectsToArr[i] + ' | node_from: ' + node_from);
+                    var removeConnIndex = node_data.connectsToIndexes[i];
+                    console.log('delete conn: ' + removeConnIndex);
+
+                    console.log('connections.size1 = ' + connections.length);
+
+                    connections[removeConnIndex].line.remove();
+                    connections[removeConnIndex].arrow_line1.remove();
+                    connections[removeConnIndex].arrow_line2.remove();
+                    connections.slice(0, 1);
+
+                    console.log('connections.size2 = ' + connections.length);
+                }
+            }*/
+
             var connection = snap.create_connection(drawable_from.select('.nodeCircle'), drawable_to.select('.nodeCircle'), 'black');
             connections.push(connection);
         }

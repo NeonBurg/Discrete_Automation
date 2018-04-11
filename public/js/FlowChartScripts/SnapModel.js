@@ -19,7 +19,7 @@ var DiagramModel = {
     },
 
     addData: function(_drawable, _data) {
-        this.data[_drawable.id] = {'title': _data.title, 'types': _data.types, 'names': _data.names, 'formats': _data.formats};
+        this.data[_drawable.id] = {'title': _data.title, 'types': _data.types, 'names': _data.names, 'formats': _data.formats, 'connectsFrom': [], 'connectsTo':[], 'connectsToIndexes':[]};
         this.drawable[_drawable.id] = _drawable;
         this.id_list.push(_drawable.id);
     },
@@ -90,6 +90,12 @@ var DiagramModel = {
         this.id_list = new Array();
         this.connects = new Array();
         this.data = {};
+    },
+
+    addConnect2: function(_fromDrawableId, _toDrawableId, _connIndex) {
+        this.data[_fromDrawableId].connectsTo.push(this.getIndexByDrawableId(_toDrawableId));
+        this.data[_toDrawableId].connectsFrom.push(this.getIndexByDrawableId(_fromDrawableId));
+        this.data[_fromDrawableId].connectsToIndexes.push(_connIndex);
     },
 
     addConnect: function(_index1, _index2, _type1, _type2) {
