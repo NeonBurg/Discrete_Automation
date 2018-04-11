@@ -221,44 +221,48 @@ function Controller() {
 
         if(node_to != null) {
             console.log('node_from: ' + node_from + ' | node_to: ' + node_to);
-            var drawable_from = DiagramModel.getDrawableByIndex(node_from);
-            var drawable_to = DiagramModel.getDrawableByIndex(node_to);
 
-            console.log('add connect from: ' + drawable_from.id + ' | connIndex = ' + connections.length);
-            DiagramModel.addConnect2(drawable_from.id, drawable_to.id, connections.length);
+            if(node_from != node_to) {
 
-            var node_data = DiagramModel.getDataByIndex(node_to);
-            console.log('drawable_from data: ' + JSON.stringify(node_data));
+                var drawable_from = DiagramModel.getDrawableByIndex(node_from);
+                var drawable_to = DiagramModel.getDrawableByIndex(node_to);
 
-            var removeConnIndex = -1;
+                console.log('add connect from: ' + drawable_from.id + ' | connIndex = ' + connections.length);
+                DiagramModel.addConnect2(drawable_from.id, drawable_to.id, connections.length);
 
-            // Проверка создания противоположенно направленных связей между узлами
-            var connectsToArr = node_data.connectsTo;
-            for(var i=0; i<connectsToArr.length; i++) {
-                if(connectsToArr[i] === node_from) {
-                    console.log('connectsToArr[i]: ' + connectsToArr[i] + ' | node_from: ' + node_from);
-                    removeConnIndex = node_data.connectsToIndexes[i];
-                    console.log('delete conn: ' + removeConnIndex);
+                var node_data = DiagramModel.getDataByIndex(node_to);
+                console.log('drawable_from data: ' + JSON.stringify(node_data));
 
-                    console.log('connections.size1 = ' + connections.length);
+                var removeConnIndex = -1;
 
-                    // Удаляем одну из линий
-                    //connections[removeConnIndex].line.remove();
-                    //connections[removeConnIndex].arrow_line1.remove();
-                    //connections[removeConnIndex].arrow_line2.remove();
-                    //connections.slice(0, 1);
+                // Проверка создания противоположенно направленных связей между узлами
+                var connectsToArr = node_data.connectsTo;
+                for (var i = 0; i < connectsToArr.length; i++) {
+                    if (connectsToArr[i] === node_from) {
+                        console.log('connectsToArr[i]: ' + connectsToArr[i] + ' | node_from: ' + node_from);
+                        removeConnIndex = node_data.connectsToIndexes[i];
+                        console.log('delete conn: ' + removeConnIndex);
 
-                    console.log('connections.size2 = ' + connections.length);
+                        console.log('connections.size1 = ' + connections.length);
+
+                        // Удаляем одну из линий
+                        //connections[removeConnIndex].line.remove();
+                        //connections[removeConnIndex].arrow_line1.remove();
+                        //connections[removeConnIndex].arrow_line2.remove();
+                        //connections.slice(0, 1);
+
+                        console.log('connections.size2 = ' + connections.length);
+                    }
                 }
+
+                var connection = snap.create_connection(drawable_from.select('.nodeCircle'), drawable_to.select('.nodeCircle'), 'black');
+
+                if (removeConnIndex != -1) {
+                    snap.split_double_connections(connections[removeConnIndex], connection);
+                }
+
+                connections.push(connection);
             }
-
-            var connection = snap.create_connection(drawable_from.select('.nodeCircle'), drawable_to.select('.nodeCircle'), 'black');
-
-            if(removeConnIndex != -1) {
-                snap.split_double_connections(connections[removeConnIndex], connection);
-            }
-
-            connections.push(connection);
         }
 
         node_to = null;
