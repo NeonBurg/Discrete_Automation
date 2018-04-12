@@ -61,9 +61,6 @@ function Controller() {
                 //var types = ['String'];
                 //var names = ['A', 'B', 'C'];
                 sendData.title = 'a'+DiagramModel.getCountDiagrams();
-                sendData.types = ['String'];
-                sendData.names = [''];
-                sendData.formats = [''];
                 AddDiagram(this, sendData);
 
             }
@@ -96,6 +93,12 @@ function Controller() {
                     selectTool(2);
                 }
                 break;
+            case snap.select('#variablesTool').id:
+                if(selected_tool_index != 3) {
+                    modal_form.showModalDialog();
+                    selectTool(3);
+                }
+                break;
         }
     }
 
@@ -115,6 +118,9 @@ function Controller() {
                 //onSaveToolSelected();
                 toolDrawable = snap.select('#saveTool');
                 break;
+            case 3:
+                toolDrawable = snap.select('#variablesTool');
+                break;
         }
 
         if(selection_object) unselectTool();
@@ -124,6 +130,10 @@ function Controller() {
         selection_object = snap.rect(t_x-9, t_y-4, 47, 39).attr({fill:"#b5b5b5"});
         selection_object.after(toolDrawable);
         selected_tool_index = index;
+    }
+
+    this.selectTool = function(index) {
+        selectTool(index);
     }
 
     function onArrowToolSelected() {

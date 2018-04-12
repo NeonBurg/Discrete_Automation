@@ -3,23 +3,19 @@ var DiagramModel = {
     id_list: [],
     data: {},
     drawable: {},
-    typeList: [],
-    nameList: [],
-    inptFormats: [],
     connects: [],
+    variables_names: [],
+    variables_values: [],
 
     setData: function(_drawableId, _data) {
         //this.data[_drawable.id] = {'title': _data.title, 'content': _data.content};
 
         //this.data[_drawableId] = {'title': _data.title, 'types': _data.types, 'names': _data.names};
         this.data[_drawableId].title = _data.title;
-        this.data[_drawableId].types = _data.types;
-        this.data[_drawableId].names = _data.names;
-        this.data[_drawableId].formats = _data.formats;
     },
 
     addData: function(_drawable, _data) {
-        this.data[_drawable.id] = {'title': _data.title, 'types': _data.types, 'names': _data.names, 'formats': _data.formats, 'connectsFrom': [], 'connectsTo':[], 'connectsToIndexes':[]};
+        this.data[_drawable.id] = {'title': _data.title, 'connectsFrom': [], 'connectsTo':[], 'connectsToIndexes':[]};
         this.drawable[_drawable.id] = _drawable;
         this.id_list.push(_drawable.id);
     },
@@ -44,18 +40,6 @@ var DiagramModel = {
         return this.data;
     },
 
-    getTypes: function(_id) {
-        return this.data[_id].types;
-    },
-
-    getNames: function(_id) {
-        return this.data[_id].names;
-    },
-
-    getFormats: function(_id) {
-        return this.data[_id].formats;
-    },
-
     getDrawableById: function(_id) {
         return this.drawable[_id];
     },
@@ -66,17 +50,6 @@ var DiagramModel = {
 
     getCountDiagrams: function() {
         return this.id_list.length;
-    },
-
-    getCountInputs: function(_id) {
-        return this.data[_id].types.length;
-    },
-
-    getIndexByNodeId: function(_nodeId) {
-        for(var i=0; i<this.id_list.length; i++) {
-            if(this.drawable[this.id_list[i]].select('.to').id == _nodeId
-                || this.drawable[this.id_list[i]].select('.from').id == _nodeId) return i;
-        }
     },
 
     removeDiagramByIndex: function(_index) {
@@ -122,5 +95,22 @@ var DiagramModel = {
             if(this.id_list[i] == _id) return i;
         }
         return -1;
+    },
+
+    addVariable: function(name, value) {
+        this.variables_names.push(name);
+        this.variables_values.push(value);
+    },
+
+    getVariablesNames: function() {
+        return this.variables_names;
+    },
+
+    getVariablesValues: function() {
+        return this.variables_values;
+    },
+
+    getVariablesCount: function() {
+        return this.variables_names.length;
     }
 }

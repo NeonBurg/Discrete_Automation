@@ -7,16 +7,55 @@
     <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="js/snap.svg.js"></script>
     <script type="text/javascript" src="js/plugin_connect.js"></script>
+    <script type="text/javascript" src="js/modal_form.js"></script>
     <script type="text/javascript" src="js/FlowChartScripts/SnapController.js"></script>
     <script type="text/javascript" src="js/FlowChartScripts/SnapModel.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/style.css">
 
+    <script type="text/javascript">
+        // Добавляем строку с переменными в модальное окно
+        function addVariable() {
+            var new_variable_row = document.createElement('div');
+            new_variable_row.style.marginTop = "10px";
+            new_variable_row.style.display = "inline-block";
+            //new_variable_row.style.border = "1px solid";
+            //var variable_index = document.getElementById('modal_content').getElementsByTagName('div').length;
+            var variable_index = DiagramModel.getVariablesCount();
+
+            new_variable_row.innerHTML='<input type="checkbox" name="check" style="visibility: hidden; position:absolute; float:left; width:24px; height:24px; margin-right:5px;">' +
+                    '<input name"variableNameInput" id="inptNameId_"' + variable_index + ' style="width:40%; float:left; height:20px;" value="x'+variable_index+'">' +
+                    '<div style="display:inline-block; padding-left:8px;">=</div>' +
+                '<input type="button" value="X" style="visibility:visible; position:relative; float:right; margin-left:10px; padding:3px;" onclick="delVariable(' + variable_index + ');">' +
+                '<input name"variableValueInput" id="inptValueId_"\' + variable_index + \'" style="width:40%; float:right; float:bottom; height:20px;">';
+
+            document.getElementById('modal_content').appendChild(new_variable_row);
+            DiagramModel.addVariable("x"+variable_index, "");
+        }
+
+        // Удаляем строку с переменными
+        function delVariable(index) {
+            document.getElementById('modal_content').removeChild(document.getElementById('modal_content').getElementsByTagName('div')[index]);
+        }
+    </script>
 </head>
+
 <body>
 
     <h1>This is test page</h1>
     Content here (Modified by <strong>Nick</strong>)
+
+    <!------------ Модальное окно Диаграммы ------------>
+    <div id="modal_form"><!-- Сaмo oкнo -->
+        <span id="modal_close">X</span> <!-- Кнoпкa зaкрыть -->
+        <!-- Тут любoе сoдержимoе -->
+        Переменные:<br>
+        <div>
+            <input type="button" onclick="addVariable()" value="Добавить" style="height:20px; margin-right:10px;">
+        </div>
+        <div id="modal_content" style="width:100%;"></div>
+    </div>
+    <div id="overlay"></div><!-- Пoдлoжкa -->
 
     <svg width="0" height="0">
 

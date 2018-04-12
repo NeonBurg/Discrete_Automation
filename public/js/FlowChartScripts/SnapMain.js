@@ -26,6 +26,8 @@ var rectList = [];
 
 var zero_state_node = null;
 
+var modal_form = new ModalForm();
+
 
 // ---------------- Функции для создания графики -------------------
 
@@ -39,9 +41,11 @@ function createToolsMenuBlock() {
     var arrow_img = snap.image("/img/arrow.svg", leftSide_w + 10, 5, 30, 30).attr({id: "arrowTool"});
     var connect_img = snap.image("/img/connection.svg", leftSide_w + 60, 5, 30, 30).attr({id: "connectTool"});
     var save_img = snap.image("/img/save.svg", leftSide_w + 110, 5, 30, 30).attr({id: "saveTool"});
+    var variables_img = snap.image("/img/variables.svg", leftSide_w + 160, 5, 30, 30).attr({id: "variablesTool"});
     arrow_img.click(controller.toolClicked);
     connect_img.click(controller.toolClicked);
     save_img.click(controller.toolClicked);
+    variables_img.click(controller.toolClicked);
     controller.chooseTool(0);
 }
 
