@@ -15,6 +15,6 @@ app.engine('html', require('ejs').renderFile);
 
 require('./app/routes.js')(app);
 
-app.listen(3000, "192.168.0.101", function(){
-    console.log('Example app listening on port 3000 !')
+app.listen(3000, "192.168.0.100", function() {
+    console.log('Example app listening on port 3000 !');
 });

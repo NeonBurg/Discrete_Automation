@@ -4,8 +4,8 @@ var DiagramModel = {
     data: {},
     drawable: {},
     connects: [],
-    variables_names: [],
-    variables_values: [],
+    input_variables: {},
+    output_variables: {},
 
     setData: function(_drawableId, _data) {
         //this.data[_drawable.id] = {'title': _data.title, 'content': _data.content};
@@ -65,14 +65,10 @@ var DiagramModel = {
         this.data = {};
     },
 
-    addConnect2: function(_fromDrawableId, _toDrawableId, _connIndex) {
+    addConnect: function(_fromDrawableId, _toDrawableId, _connIndex) {
         this.data[_fromDrawableId].connectsTo.push(this.getIndexByDrawableId(_toDrawableId));
         this.data[_toDrawableId].connectsFrom.push(this.getIndexByDrawableId(_fromDrawableId));
         this.data[_fromDrawableId].connectsToIndexes.push(_connIndex);
-    },
-
-    addConnect: function(_index1, _index2, _type1, _type2) {
-        this.connects.push({'firstConn': _index1, 'secondConn': _index2, 'firstNodeType': _type1, 'secondNodeType': _type2});
     },
 
     delConnectByIndex: function(_index) {
@@ -97,20 +93,59 @@ var DiagramModel = {
         return -1;
     },
 
-    addVariable: function(name, value) {
-        this.variables_names.push(name);
-        this.variables_values.push(value);
+    // ---------------- INPUT Variables methods --------------------
+
+    addInputVariable: function(name, value) {
+        this.input_variables[name] = value;
     },
 
-    getVariablesNames: function() {
-        return this.variables_names;
+    setInputVariable: function(key_name, name, value) {
+        delete this.input_variables[key_name];
+        this.input_variables[name] = value;
     },
 
-    getVariablesValues: function() {
-        return this.variables_values;
+    getInputVariableValue: function(key_name) {
+        return this.input_variables[key_name];
     },
 
-    getVariablesCount: function() {
-        return this.variables_names.length;
+    getInputVariables: function() {
+        return this.input_variables;
+    },
+
+    getInputVariablesCount: function() {
+        //return this.input_variables_names.length;
+        return Object.keys(this.input_variables).length;
+    },
+
+    removeInputVariable: function(key_name) {
+        delete this.input_variables[key_name];
+    },
+
+    // --------------- OUTPUT Variables methods -------------------
+
+    addOutputVariable: function(name, value) {
+        this.output_variables[name] = value;
+    },
+
+    setOutputVariable: function(key_name, name, value) {
+        delete this.output_variables[key_name];
+        this.output_variables[name] = value;
+    },
+
+    getOutputVariableValue: function(key_name) {
+        return this.output_variables[key_name];
+    },
+
+    getOutputVariables: function() {
+        return this.output_variables;
+    },
+
+    getOutputVariablesCount: function() {
+        //return this.input_variables_names.length;
+        return Object.keys(this.output_variables).length;
+    },
+
+    removeOutputVariable: function(key_name) {
+        delete this.output_variables[key_name];
     }
 }

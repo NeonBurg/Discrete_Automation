@@ -42,10 +42,12 @@ function createToolsMenuBlock() {
     var connect_img = snap.image("/img/connection.svg", leftSide_w + 60, 5, 30, 30).attr({id: "connectTool"});
     var save_img = snap.image("/img/save.svg", leftSide_w + 110, 5, 30, 30).attr({id: "saveTool"});
     var variables_img = snap.image("/img/variables.svg", leftSide_w + 160, 5, 30, 30).attr({id: "variablesTool"});
+    var outputs_img = snap.image("/img/outputs.svg", leftSide_w + 210, 5, 30, 30).attr({id: "outputsTool"});
     arrow_img.click(controller.toolClicked);
     connect_img.click(controller.toolClicked);
     save_img.click(controller.toolClicked);
     variables_img.click(controller.toolClicked);
+    outputs_img.click(controller.toolClicked);
     controller.chooseTool(0);
 }
 

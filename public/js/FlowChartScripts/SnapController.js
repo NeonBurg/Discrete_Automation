@@ -1,8 +1,10 @@
 // SnapController.js
 
-var connections = new Array();
+//var connections = new Array();
 
 function Controller() {
+
+    var connections = new Array();
 
     var dxToolMoved = 0;
     var firstTouch = false;
@@ -76,14 +78,12 @@ function Controller() {
         switch(this.id) {
             case snap.select('#arrowTool').id:
                 if(selected_tool_index != 0) {
-                    onArrowToolSelected();
                     selectTool(0);
                     //console.log('toolClicked: arrow');
                 }
                 break;
             case snap.select('#connectTool').id:
                 if(selected_tool_index != 1) {
-                    onConnectToolSelected();
                     selectTool(1);
                     //console.log('toolClicked: connect');
                 }
@@ -95,8 +95,14 @@ function Controller() {
                 break;
             case snap.select('#variablesTool').id:
                 if(selected_tool_index != 3) {
-                    modal_form.showModalDialog();
+                    modal_form.showModalDialog(modal_form.input_variables_modal);
                     selectTool(3);
+                }
+                break;
+            case snap.select('#outputsTool').id:
+                if(selected_tool_index != 4) {
+                    modal_form.showModalDialog(modal_form.output_variables_modal);
+                    selectTool(4);
                 }
                 break;
         }
@@ -109,9 +115,11 @@ function Controller() {
 
         switch(index) {
             case 0:
+                onArrowToolSelected();
                 toolDrawable = snap.select('#arrowTool');
                 break;
             case 1:
+                onConnectToolSelected();
                 toolDrawable = snap.select('#connectTool');
                 break;
             case 2:
@@ -120,6 +128,9 @@ function Controller() {
                 break;
             case 3:
                 toolDrawable = snap.select('#variablesTool');
+                break;
+            case 4:
+                toolDrawable = snap.select('#outputsTool');
                 break;
         }
 
@@ -238,7 +249,7 @@ function Controller() {
                 var drawable_to = DiagramModel.getDrawableByIndex(node_to);
 
                 console.log('add connect from: ' + drawable_from.id + ' | connIndex = ' + connections.length);
-                DiagramModel.addConnect2(drawable_from.id, drawable_to.id, connections.length);
+                DiagramModel.addConnect(drawable_from.id, drawable_to.id, connections.length);
 
                 var node_data = DiagramModel.getDataByIndex(node_to);
                 console.log('drawable_from data: ' + JSON.stringify(node_data));
@@ -255,12 +266,6 @@ function Controller() {
 
                         console.log('connections.size1 = ' + connections.length);
 
-                        // Удаляем одну из линий
-                        //connections[removeConnIndex].line.remove();
-                        //connections[removeConnIndex].arrow_line1.remove();
-                        //connections[removeConnIndex].arrow_line2.remove();
-                        //connections.slice(0, 1);
-
                         console.log('connections.size2 = ' + connections.length);
                     }
                 }
@@ -272,6 +277,14 @@ function Controller() {
                 }
 
                 connections.push(connection);
+
+                modal_form.showModalDialog(modal_form.connection_modal, connections.length-1);
+
+                //var connection_text = 'my new text';
+                //connection.text_element.attr({text: connection_text});
+                //connection.text = connection_text;
+
+                //connections.push(connection);
             }
         }
 
@@ -297,6 +310,10 @@ function Controller() {
 
     this.GetDrawableById = function(_drawableId) {
         return DiagramModel.getDrawableById(_drawableId);
+    }
+
+    this.getConnection = function(_connIndex) {
+        return connections[_connIndex];
     }
 }
 

@@ -21,8 +21,8 @@ body, html {
 
 /* -------------- Стили модального окна ------------- */
 #modal_form {
-    width: 320px;
-    height: 320px; /* Рaзмеры дoлжны быть фиксирoвaны */
+    min-width: 335px;
+    min-height: 320px; /* Рaзмеры дoлжны быть фиксирoвaны */
     border-radius: 5px;
     border: 3px #000 solid;
     background: #fff;

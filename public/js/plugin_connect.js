@@ -154,8 +154,10 @@ Snap.plugin(function (Snap, Element, Paper, global) {
                 arrow_line1: this.path(path_arrow1).attr({stroke:'#000', strokeWidth:1}),
                 arrow_line2: this.path(path_arrow2).attr({stroke:'#000', strokeWidth:1}),
                 align: 1,
-                text_element: snap.text(textCoords.x, textCoords.y, variables_text),
-                text: variables_text
+                text_element: snap.text(textCoords.x, textCoords.y),
+                text: ''
+                //text_element: snap.text(textCoords.x, textCoords.y, variables_text),
+                //text: variables_text
                 //circle: this.circle(new_x, new_y, 10).attr({fill:'#ffffff', stroke:'#000', strokeWidth:1})
                 //circle: this.path(snap.circlePath(new_x, new_y, 10)).attr({fill:'#ffffff', stroke:'#000', strokeWidth:1})
             };
@@ -219,8 +221,9 @@ Snap.plugin(function (Snap, Element, Paper, global) {
         conn_to.arrow_line1.attr({path: path_arrow1}).attr({stroke:'#000', strokeWidth:1});
         conn_to.arrow_line2.attr({path: path_arrow2}).attr({stroke:'#000', strokeWidth:1});
         conn_to.align = 3;
-        conn_to.text_element.attr({x: textCoords.x, y: textCoords.y, text:'x4, x5'});
-        conn_to.text = 'x4, x5';
+        conn_to.text_element.attr({x: textCoords.x, y: textCoords.y});
+        //conn_to.text_element.attr({x: textCoords.x, y: textCoords.y, text:'x4, x5'});
+        //conn_to.text = 'x4, x5';
 
     }
 
