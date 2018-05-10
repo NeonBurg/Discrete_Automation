@@ -4,7 +4,7 @@
 
 function Controller() {
 
-    var connections = new Array();
+    //var connections = new Array();
 
     var dxToolMoved = 0;
     var firstTouch = false;
@@ -28,8 +28,12 @@ function Controller() {
 
         if(firstTouch == true) dxToolMoved = dx;
 
-        for (var i = connections.length; i--;) {
+        /*for (var i = connections.length; i--;) {
             snap.create_connection(connections[i]);
+        }*/
+
+        for (var i = DiagramModel.getConnectsCount(); i--;) {
+            snap.create_connection(DiagramModel.getConnectByIndex(i));
         }
 
         //console.log(this.data('origTransform') + (this.data('origTransform') ? "T" : "t") + [dx, dy]);
@@ -53,7 +57,7 @@ function Controller() {
 
     // ------------------ Конец перемещения диаграммы ------------------
     this.stopMoveDiagram = function(evnt) {
-        if(firstTouch == true)
+        if(firstTouch === true)
         {
             if(dxToolMoved < leftSide_w/2+rectTool_s+1) {
                 this.remove();
@@ -77,30 +81,30 @@ function Controller() {
 
         switch(this.id) {
             case snap.select('#arrowTool').id:
-                if(selected_tool_index != 0) {
+                if(selected_tool_index !== 0) {
                     selectTool(0);
                     //console.log('toolClicked: arrow');
                 }
                 break;
             case snap.select('#connectTool').id:
-                if(selected_tool_index != 1) {
+                if(selected_tool_index !== 1) {
                     selectTool(1);
                     //console.log('toolClicked: connect');
                 }
                 break;
             case snap.select('#saveTool').id:
-                if(selected_tool_index != 2) {
+                if(selected_tool_index !== 2) {
                     selectTool(2);
                 }
                 break;
             case snap.select('#variablesTool').id:
-                if(selected_tool_index != 3) {
+                if(selected_tool_index !== 3) {
                     modal_form.showModalDialog(modal_form.input_variables_modal);
                     selectTool(3);
                 }
                 break;
             case snap.select('#outputsTool').id:
-                if(selected_tool_index != 4) {
+                if(selected_tool_index !== 4) {
                     modal_form.showModalDialog(modal_form.output_variables_modal);
                     selectTool(4);
                 }
@@ -123,7 +127,7 @@ function Controller() {
                 toolDrawable = snap.select('#connectTool');
                 break;
             case 2:
-                //onSaveToolSelected();
+                onSaveToolSelected();
                 toolDrawable = snap.select('#saveTool');
                 break;
             case 3:
@@ -145,7 +149,7 @@ function Controller() {
 
     this.selectTool = function(index) {
         selectTool(index);
-    }
+    };
 
     function onArrowToolSelected() {
         if(connect_mode) connectModeOff();
@@ -156,9 +160,55 @@ function Controller() {
         connectModeOn();
     }
 
+    function onSaveToolSelected() {
+        var connections_data = DiagramModel.getConnects();
+
+        modal_form.showModalDialog(modal_form.save_diagram_modal);
+
+        /*for(var i=0; i<connections_data.length; i++) {
+            console.log('---------------------');
+            console.log('connection: ' + i);
+            var input_vars = connections_data[i].inputVariables;
+            var output_vars = connections_data[i].outputVariables;
+            var input_vars_text = '';
+            var output_vars_text = '';
+            for(var j=0; j<input_vars.length; j++) {
+                input_vars_text += input_vars[j] + ' | ';
+            }
+            for(var j=0; j<output_vars.length; j++) {
+                output_vars_text += output_vars[j];
+            }
+            console.log('inputs: ' + input_vars_text);
+            console.log('outputs: ' + output_vars_text);
+        }
+
+        var projectName = 'test2';
+
+        $.get("/getProjectsNamesList", {}, function(response) {
+            var projects_filenames = JSON.parse(response);
+            var filename_unique = true;
+
+            for(var i=0; i<projects_filenames.length; i++) {
+                //console.log('pName = ' +pName + ' | pName = ' + projectName);
+                if(pName === projects_filenames[i]) filename_unique = false;
+            }
+
+            if(filename_unique) {
+                $.post("/saveProject", {pName: projectName, pData: JSON.stringify(connections_data)}, onFileWriteSuccess);
+            }
+            else {
+                console.log('project \''+projectName+'\' already exist!');
+            }
+        });*/
+    }
+
+    function onFileWriteSuccess(response) {
+        console.log('fw_response: ' + response);
+    }
+
     this.chooseTool = function (index) {
         selectTool(index);
-    }
+    };
 
     // Снимаем выделение инструмента
     function unselectTool() {
@@ -194,17 +244,17 @@ function Controller() {
         if(connect_mode) {
             this.select('.nodeCircle').attr({stroke: "#fff600"});
 
-            if(node_from != null && node_to == null) node_to = DiagramModel.getIndexByDiagramId(this.id);
+            if(node_from !== null && node_to === null) node_to = DiagramModel.getIndexByDiagramId(this.id);
         }
 
-    }
+    };
 
     this.mouseoutConn = function() {
         if(connect_mode) {
             this.select('.nodeCircle').attr({stroke: "#000"});
             if(node_to != null) node_to = null;
         }
-    }
+    };
 
     // ------------- Движение -------------
     this.movingConn = function(dx,dy, x, y) {
@@ -215,7 +265,7 @@ function Controller() {
         //console.log((tempCircle.data('origTransform') + tempCircle.data('origTransform') ? "T" : "t") + [dx, dy]);
 
         if(tempConnection) snap.connection(tempConnection);
-    }
+    };
 
 
     // ---------- Начало движения -----------
@@ -229,7 +279,7 @@ function Controller() {
         //console.log('node index: ' + DiagramModel.getIndexByDiagramId(this.id));
         node_from = DiagramModel.getIndexByDiagramId(this.id);
         console.log('node_from: ' + node_from);
-    }
+    };
 
 
     // ---------- Конец движения ------------
@@ -240,16 +290,13 @@ function Controller() {
             tempCircle.remove();
         }
 
-        if(node_to != null) {
+        if(node_to !== null) {
             console.log('node_from: ' + node_from + ' | node_to: ' + node_to);
 
-            if(node_from != node_to) {
+            if(node_from !== node_to) {
 
                 var drawable_from = DiagramModel.getDrawableByIndex(node_from);
                 var drawable_to = DiagramModel.getDrawableByIndex(node_to);
-
-                console.log('add connect from: ' + drawable_from.id + ' | connIndex = ' + connections.length);
-                DiagramModel.addConnect(drawable_from.id, drawable_to.id, connections.length);
 
                 var node_data = DiagramModel.getDataByIndex(node_to);
                 console.log('drawable_from data: ' + JSON.stringify(node_data));
@@ -263,58 +310,72 @@ function Controller() {
                         console.log('connectsToArr[i]: ' + connectsToArr[i] + ' | node_from: ' + node_from);
                         removeConnIndex = node_data.connectsToIndexes[i];
                         console.log('delete conn: ' + removeConnIndex);
-
-                        console.log('connections.size1 = ' + connections.length);
-
-                        console.log('connections.size2 = ' + connections.length);
                     }
                 }
 
                 var connection = snap.create_connection(drawable_from.select('.nodeCircle'), drawable_to.select('.nodeCircle'), 'black');
 
-                if (removeConnIndex != -1) {
-                    snap.split_double_connections(connections[removeConnIndex], connection);
+                if (removeConnIndex !== -1) {
+                    //snap.split_double_connections(connections[removeConnIndex], connection);
+                    snap.split_double_connections(DiagramModel.getConnectByIndex(removeConnIndex), connection);
                 }
 
-                connections.push(connection);
+                //console.log('add connect from: ' + drawable_from.id + ' | connIndex = ' + connections.length-1);
+                DiagramModel.addConnect(drawable_from.id, drawable_to.id, connection);
 
-                modal_form.showModalDialog(modal_form.connection_modal, connections.length-1);
+                modal_form.showModalDialog(modal_form.connection_modal, DiagramModel.getConnectsCount()-1);
 
-                //var connection_text = 'my new text';
-                //connection.text_element.attr({text: connection_text});
-                //connection.text = connection_text;
-
-                //connections.push(connection);
             }
         }
 
         node_to = null;
         node_from = null;
-    }
+    };
+
+    // ----------------- Сохраняем/Загружаем проект --------------------
+    this.save_project_clicked = function() {
+        var project_name = $('#ProjNameInput').val();
+        //console.log('save_project func: pName = ' + pName);
+        $.post("/getIsProjectNameUnique", {pName: project_name}, function(response) {
+            if(response === 'true') {
+                console.log('response = ' + response);
+            }
+            else {
+                $('#error_msg').text("Проект с таким названием уже существует");
+            }
+        });
+    };
+
+    // -----------------------------------------------------------------
 
 
     // -------------------------- СЕТТЕРЫ ------------------------------
     this.setData = function(_drawableId, _data) {
         DiagramModel.setData(_drawableId, _data);
-    }
+    };
 
     // -------------------------- ГЕТТЕРЫ ------------------------------
 
     this.GetCountElements = function() {
         return DiagramModel.getCountDiagrams();
-    }
+    };
 
     this.GetDrawableByIndex = function(_index) {
         return DiagramModel.getDrawableByIndex(_index);
-    }
+    };
 
     this.GetDrawableById = function(_drawableId) {
         return DiagramModel.getDrawableById(_drawableId);
-    }
+    };
 
     this.getConnection = function(_connIndex) {
-        return connections[_connIndex];
-    }
+        return DiagramModel.getConnectByIndex(_connIndex);
+    };
+
+    this.getConnectionData = function(_connIndex) {
+        return DiagramModel.getConnectDataByIndex(_connIndex);
+    };
+
 }
 
 // ------------------- Остальные методы ------------------------
@@ -323,7 +384,7 @@ var AddDiagram = function(_drawable, _data) {
     var cx = _drawable.select('.nodeTitle').attr("x");
     _drawable.select('.nodeTitle').attr({x: cx-4, text: _data.title});
 
-    if(DiagramModel.getCountDiagrams() == 0) zero_state_node = _drawable;
+    if(DiagramModel.getCountDiagrams() === 0) zero_state_node = _drawable;
 
     DiagramModel.addData(_drawable, _data);
-}
+};

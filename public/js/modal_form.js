@@ -12,6 +12,7 @@ function ModalForm() {
     this.input_variables_modal = 1;
     this.output_variables_modal = 2;
     this.connection_modal = 3;
+    this.save_diagram_modal = 4;
 
     var conn_index = null;
 
@@ -100,6 +101,30 @@ function ModalForm() {
                 for(var key_name in output_variables) {
                     addVariable(key_name, false, true);
                 }
+                break;
+            case this.save_diagram_modal:
+                modal_dynamic_content.innerHTML = '<div style="margin-right:5px; display:block;">' +
+                        '<div style="text-align:center;"><h3>Сохранение проекта</h3></div>' +
+                        'Название проекта:<br>' +
+                        '<div id="error_msg" style="color:crimson; font-size:10pt;"></div>' +
+                        '<input id="ProjNameInput" style="width:100%;">' +
+                        '<div style="overflow: auto;"><input type="button" onclick="controller.save_project_clicked()" value="Сохранить" style="height:25px; float:right; padding: 0 10px; margin-top:10px;"></div>' +
+                        '<div style=""><div style="text-align:center; margin-top:15px;"><h3>Загрузка проекта</h3></div>' +
+                        '<select id="ProjSelect" style="width:100%;"></select>' +
+                        '<input type="button" onclick="" value="Загрузить" style="height:25px; position:rleative; float:right; padding: 0 10px; margin-top:10px;"></div>' +
+                    '</div>';
+
+                document.getElementById('modal_form').appendChild(modal_dynamic_content);
+
+                $.get("/getProjectsNamesList", {}, function(response) {
+                    var projects_filenames = JSON.parse(response);
+                    var projSel = document.getElementById('ProjSelect');
+                    for(var i=0; i<projects_filenames.length; i++) {
+                        console.log('');
+                        projSel.options[i] = new Option(projects_filenames[i], projects_filenames[i]);
+                    }
+                    projSel.options[0].selected = true;
+                });
 
                 break;
         }
@@ -139,6 +164,9 @@ function ModalForm() {
         console.log('create_conn_text');
         var connection_text = '';
 
+        var conn_input_vars = [];
+        var conn_output_vars = [];
+
         var input_variables = DiagramModel.getInputVariables();
         var input_count = 0;
         for(var key_name in input_variables) {
@@ -146,6 +174,7 @@ function ModalForm() {
             var check_box = document.getElementById('inputCheckBoxId_'+key_name);
             if(check_box.checked) {
                 connection_text += key_name + ', ';
+                conn_input_vars.push(key_name);
                 input_count++;
             }
         }
@@ -158,6 +187,7 @@ function ModalForm() {
             var check_box = document.getElementById('outputCheckBoxId_'+key_name);
             if(check_box.checked) {
                 output_vars_text += key_name + ', ';
+                conn_output_vars.push(key_name);
                 output_count++;
             }
         }
@@ -166,8 +196,11 @@ function ModalForm() {
             connection_text = connection_text + ' / ' + output_vars_text;
         }
 
-        controller.getConnection(conn_index).text_element.attr({text: connection_text});
-        controller.getConnection(conn_index).text = connection_text;
+        current_connection = controller.getConnectionData(conn_index);
+        current_connection.connection.text_element.attr({text: connection_text});
+        current_connection.connection.text = connection_text;
+        current_connection.inputVariables = conn_input_vars;
+        current_connection.outputVariables = conn_output_vars;
     }
 
 
