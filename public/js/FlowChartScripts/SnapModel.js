@@ -6,6 +6,8 @@ var DiagramModel = {
     connects: [],
     input_variables: {},
     output_variables: {},
+    current_project_name: '',
+    current_project_index: -1,
 
     setData: function(_drawableId, _data) {
         //this.data[_drawable.id] = {'title': _data.title, 'content': _data.content};
@@ -63,13 +65,30 @@ var DiagramModel = {
         this.id_list = new Array();
         this.connects = new Array();
         this.data = {};
+        this.input_variables = {};
+        this.output_variables = {};
+    },
+
+    getIndexByTitle: function(_title) {
+        for(var i=0; i<this.id_list.length; i++) {
+            if(this.data[this.id_list[i]].title == _title) return i;
+        }
+        return -1;
+    },
+
+    getIndexByDiagramId: function(_id) {
+        for(var i=0; i<this.id_list.length; i++) {
+            if(this.id_list[i] == _id) return i;
+        }
+        return -1;
     },
 
     addConnect: function(_fromDrawableId, _toDrawableId, _connection) {
         this.data[_fromDrawableId].connectsTo.push(this.getIndexByDrawableId(_toDrawableId));
         this.data[_toDrawableId].connectsFrom.push(this.getIndexByDrawableId(_fromDrawableId));
-        //this.data[_fromDrawableId].connectsToIndexes.push(_connIndex);
+
         this.connects.push({'connection' : _connection, 'inputVariables' : '', 'outputVariables' : ''});
+        //this.connects.push({'connection' : _connection});
         this.data[_fromDrawableId].connectsToIndexes.push(this.connects.length-1);
     },
 
@@ -93,18 +112,8 @@ var DiagramModel = {
         return this.connects;
     },
 
-    getIndexByTitle: function(_title) {
-        for(var i=0; i<this.id_list.length; i++) {
-            if(this.data[this.id_list[i]].title == _title) return i;
-        }
-        return -1;
-    },
-
-    getIndexByDiagramId: function(_id) {
-        for(var i=0; i<this.id_list.length; i++) {
-            if(this.id_list[i] == _id) return i;
-        }
-        return -1;
+    clearConnects: function() {
+        this.connects.splice(0, this.connects.length);
     },
 
     // ---------------- INPUT Variables methods --------------------
@@ -116,6 +125,10 @@ var DiagramModel = {
     setInputVariable: function(key_name, name, value) {
         delete this.input_variables[key_name];
         this.input_variables[name] = value;
+    },
+
+    setInputVariablesList: function(input_variables_list) {
+        this.input_variables = input_variables_list;
     },
 
     getInputVariableValue: function(key_name) {
@@ -144,6 +157,10 @@ var DiagramModel = {
     setOutputVariable: function(key_name, name, value) {
         delete this.output_variables[key_name];
         this.output_variables[name] = value;
+    },
+
+    setOutputVariablesList: function(output_variables_list) {
+        this.output_variables = output_variables_list;
     },
 
     getOutputVariableValue: function(key_name) {

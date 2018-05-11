@@ -16,14 +16,39 @@ module.exports = function (app) {
 
             var pFilePath = './projects/' + req.body.pName + '.json';
             fs.writeFile(pFilePath, req.body.pData, function () {
-                res.end('file write success');
+                res.end('true');
             });
         }
         else {
-            res.end('undefined pName && pData');
+            console.log('undefined pName && pData');
+            res.end('false');
         }
 
     });
+
+
+    app.post('/readProjectFile', function(req, res) {
+
+        if(req.body.pFileName) {
+
+            var pFilePath = projDirPath + '/' + req.body.pFileName + '.json';
+            if(fs.existsSync(pFilePath)) {
+                var fileText = fs.readFileSync(pFilePath, 'utf8');
+                var result = {'pData' : fileText};
+                res.end(JSON.stringify(result));
+            }
+            else {
+                console.log('file: ' + pFilePath + 'does not exist')
+                res.end('false');
+            }
+        }
+        else {
+            console.log('undefined pFileName');
+            res.end('false');
+        }
+
+    });
+
 
     // Получаем список сохраненных проектов
     app.get('/getProjectsNamesList', function(req, res) {

@@ -106,12 +106,13 @@ function ModalForm() {
                 modal_dynamic_content.innerHTML = '<div style="margin-right:5px; display:block;">' +
                         '<div style="text-align:center;"><h3>Сохранение проекта</h3></div>' +
                         'Название проекта:<br>' +
-                        '<div id="error_msg" style="color:crimson; font-size:10pt;"></div>' +
+                        '<div id="error_msg_save" style="color:crimson; font-size:10pt;"></div>' +
                         '<input id="ProjNameInput" style="width:100%;">' +
                         '<div style="overflow: auto;"><input type="button" onclick="controller.save_project_clicked()" value="Сохранить" style="height:25px; float:right; padding: 0 10px; margin-top:10px;"></div>' +
                         '<div style=""><div style="text-align:center; margin-top:15px;"><h3>Загрузка проекта</h3></div>' +
+                        '<div id="error_msg_load" style="color:crimson; font-size:10pt;"></div>' +
                         '<select id="ProjSelect" style="width:100%;"></select>' +
-                        '<input type="button" onclick="" value="Загрузить" style="height:25px; position:rleative; float:right; padding: 0 10px; margin-top:10px;"></div>' +
+                        '<input type="button" onclick="controller.load_project_clicked()" value="Загрузить" style="height:25px; position:rleative; float:right; padding: 0 10px; margin-top:10px;"></div>' +
                     '</div>';
 
                 document.getElementById('modal_form').appendChild(modal_dynamic_content);
@@ -120,10 +121,16 @@ function ModalForm() {
                     var projects_filenames = JSON.parse(response);
                     var projSel = document.getElementById('ProjSelect');
                     for(var i=0; i<projects_filenames.length; i++) {
-                        console.log('');
                         projSel.options[i] = new Option(projects_filenames[i], projects_filenames[i]);
                     }
-                    projSel.options[0].selected = true;
+
+                    if(DiagramModel.current_project_index !== -1) {
+                        $('#ProjNameInput').val(DiagramModel.current_project_name);
+                        projSel.options[DiagramModel.current_project_index].selected = true;
+                    }
+                    else if(projSel.options.length > 0) {
+                        projSel.options[0].selected = true;
+                    }
                 });
 
                 break;
@@ -162,7 +169,6 @@ function ModalForm() {
 
     function create_conn_text() {
         console.log('create_conn_text');
-        var connection_text = '';
 
         var conn_input_vars = [];
         var conn_output_vars = [];
@@ -170,37 +176,30 @@ function ModalForm() {
         var input_variables = DiagramModel.getInputVariables();
         var input_count = 0;
         for(var key_name in input_variables) {
-            //console.log('key_name = ' + key_name + ' | getInputVariable('+key_name+') = ' + key_name);
+            console.log('key_name = ' + key_name);
             var check_box = document.getElementById('inputCheckBoxId_'+key_name);
+            console.log('checkbox = ' + check_box.checked);
             if(check_box.checked) {
-                connection_text += key_name + ', ';
                 conn_input_vars.push(key_name);
                 input_count++;
             }
         }
-        if(input_count > 0) connection_text = connection_text.substring(0, connection_text.length - 2); // Удалим последнею запятую после переменной
+
 
         var output_variables = DiagramModel.getOutputVariables();
-        var output_vars_text = '';
+
         var output_count = 0;
         for(var key_name in output_variables) {
+            console.log('key_name = ' + key_name);
             var check_box = document.getElementById('outputCheckBoxId_'+key_name);
+            console.log('checkbox = ' + check_box.checked);
             if(check_box.checked) {
-                output_vars_text += key_name + ', ';
                 conn_output_vars.push(key_name);
                 output_count++;
             }
         }
-        if(output_count > 0) {
-            output_vars_text = output_vars_text.substring(0, output_vars_text.length - 2); // Удалим последнею запятую после переменной
-            connection_text = connection_text + ' / ' + output_vars_text;
-        }
 
-        current_connection = controller.getConnectionData(conn_index);
-        current_connection.connection.text_element.attr({text: connection_text});
-        current_connection.connection.text = connection_text;
-        current_connection.inputVariables = conn_input_vars;
-        current_connection.outputVariables = conn_output_vars;
+        controller.setConnectionVariables(conn_index, conn_input_vars, conn_output_vars);
     }
 
 

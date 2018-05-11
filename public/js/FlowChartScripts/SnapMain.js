@@ -90,6 +90,28 @@ function createAutomationElement(_elementBefore) {
     }
 }
 
+function createAutomationElementAtPos(_xPos, _yPos) {
+    var cx = leftSide_w/2;
+    var cy = menu_title_block_height+toolsPadding+rectTool_s;
+
+    var graph_node = snap.circle(_xPos, _yPos, rectTool_s).attr({
+        fill: '#ffffff',
+        stroke: '#000',
+        strokeWidth: 2,
+        id: 'Graph_1',
+    }).addClass("nodeCircle");
+    var node_text = snap.text(_xPos-4, _yPos+4, "a").addClass("nodeTitle");
+
+    //console.log('create element ' + DiagramModel.getCountDiagrams() + ': ' + graph_node.id);
+
+    var ngroup = snap.group();
+    ngroup.add(graph_node, node_text);
+    ngroup.attr({class: 'draggable'});
+    ngroup.drag(controller.moveDiagram, controller.startMoveDiagram, controller.stopMoveDiagram);
+
+    return ngroup;
+}
+
 // -----------------------------------------------------------------
 
 
