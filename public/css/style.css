@@ -63,3 +63,95 @@ body, html {
     cursor: pointer;
     display: none; /* в oбычнoм сoстoянии её нет) */
 }
+
+
+/* ------- Терминал для ввода команд ---------*/
+#terminal-content {
+    position: fixed;
+    width:100%;
+    height:200px;
+    display: block;
+    border:0px solid;
+    bottom:0;
+}
+
+#terminal-top-line {
+    width:100%;
+    height:25px;
+    background: #b7b7b7; /* Old browsers */
+    background: -moz-linear-gradient(top, #ffffff 0%, #b7b7b7 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #ffffff 0%, #b7b7b7 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #ffffff 0%, #b7b7b7 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b7b5a1', endColorstr='#b7b5a1',GradientType=0 ); /* IE6-9 */
+    border: 1px #a1a1a1 solid;
+    padding:0;
+    margin:0;
+}
+
+#terminal-body {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+}
+
+#terminal-input-line {
+    width:100%;
+    height:25px;
+    position:fixed;
+    bottom:5px;
+    padding: 0 5px;
+}
+
+#terminal-input {
+    width:90%;
+    height:21px;
+    padding:0 5px;
+    margin:0;
+    display:inline-block;
+    vertical-align: top;
+}
+
+#terminal-send-button {
+    display:inline-block;
+}
+
+#terminal-send-button {
+    width:8%;
+    height:25px;
+    position:relative;
+    bottom: 1px;
+    padding: 0 10px;
+}
+
+#terminal-text-content {
+    width: 100%;
+    height: 125px;
+    padding: 5px 5px 0 5px;
+}
+
+#terminal-vertical-scrollbar {
+    width: 100%;
+    height: 100%;
+    border-bottom: 1px solid #b5b5b5;
+    overflow-y: scroll;
+    font-size:12pt;
+    padding-left:5px;
+    padding-bottom:5px;
+}
+
+#terminal-vertical-scrollbar::-webkit-scrollbar {
+    width:20px;
+}
+
+#terminal-vertical-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#terminal-vertical-scrollbar::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+#terminal-vertical-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+/*------------------------------------------*/
