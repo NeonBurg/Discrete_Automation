@@ -11,8 +11,37 @@
     <script type="text/javascript" src="js/FlowChartScripts/SnapController.js"></script>
     <script type="text/javascript" src="js/FlowChartScripts/SnapModel.js"></script>
     <script type="text/javascript" src="js/add_variable.js"></script>
+    <script type="text/javascript" src="js/terminal.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <script type="text/javascript">
+
+        var terminal;
+
+        jQuery(document).ready(function($) {
+
+            terminal = new Terminal();
+
+            $("#terminal-input").keyup(function(event){
+                if(event.keyCode === 13) {
+                    $('#terminal-send-button').click();
+                }
+            });
+
+            terminal.clearTerminal();
+            controller.testShow();
+
+        });
+
+        function button_send_clicked() {
+            var terminalInput = $('#terminal-input');
+
+            terminal.sendToTerminal(terminalInput.val(), terminal.USER_MSG_TYPE);
+            terminalInput.val('');
+        }
+
+    </script>
 </head>
 
 <body>
@@ -37,24 +66,13 @@
         <div id="terminal-body">
             <div id="terminal-input-line">
                 <input type="text" id="terminal-input">
-                <input type="button" value="Отправить" id="terminal-send-button">
+                <input type="button" value="Отправить" id="terminal-send-button" onclick="button_send_clicked()">
             </div>
             <div id="terminal-text-content">
                 <div id="terminal-vertical-scrollbar">
-                    test 1<br>
-                    test 2<br>
-                    test 3<br>
-                    test 4<br>
-                    test 5<br>
-                    test 6<br>
-                    test 7<br>
-                    test 8<br>
-                    test 9<br>
-                    test 10<br>
-                    test 11<br>
-                    test 12<br>
-                    test 13<br>
-                    test 14<br>
+                    <div id="terminal-text">
+                        <div class="terminal-text-row">test 1</div>
+                    </div>
                 </div>
             </div>
         </div>

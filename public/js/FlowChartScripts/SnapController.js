@@ -567,6 +567,9 @@ function Controller() {
         return DiagramModel.getConnectDataByIndex(_connIndex);
     };
 
+    this.testShow = function() {
+        terminal.sendToTerminal("testShow(): hello from controller!")
+    }
 }
 
 // ------------------- Остальные методы ------------------------

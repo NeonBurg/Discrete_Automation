@@ -154,4 +154,42 @@ body, html {
 #terminal-vertical-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+.terminal-text-row {
+    font-size:11pt;
+    padding:0;
+    margin: -2px 0;
+    border:0px #a3a3a3 solid;
+}
+
+.terminal-time-row {
+    display:inline-block;
+    color: #7d7d7d;
+    margin-right: 5px;
+}
+
+.terminal-regular-text {
+    display:inline-block;
+    color: #575757;
+}
+
+.terminal-user-text {
+    display:inline-block;
+    color: #000000;
+}
+
+.terminal-error-text {
+    display:inline-block;
+    color: #fd2d2a;
+}
+
+.terminal-warning-text {
+    display:inline-block;
+    color: #ec9c26;
+}
+
+.terminal-success-text {
+    display:inline-block;
+    color: #00cb13;
+}
 /*------------------------------------------*/

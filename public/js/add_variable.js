@@ -37,7 +37,7 @@ function addVariable(_key_name, _is_input, _is_connect) {
 
     //console.log('addVariable: key_name = ' + key_name);
 
-    new_variable_row.id = "variable_row_"+key_name; // Суши вок
+    new_variable_row.id = "variable_row_"+key_name;
 
     new_variable_row.innerHTML = '<div style="padding:0px; margin:0px; display:inline-block;">' +
         '<input type="checkbox" id="' + checkBoxId + '" name="check" style="width:0px; height:20px; display: inline-block; visibility:hidden;">' +
