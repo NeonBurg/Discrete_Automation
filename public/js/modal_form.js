@@ -144,57 +144,74 @@ function ModalForm() {
         //console.log('save_data: last_modal_type = ' + last_modal_type);
         switch(last_modal_type) {
             case modal_form.input_variables_modal:
-                var input_variables = DiagramModel.getInputVariables();
-                for(var key_name in input_variables) {
-                    //console.log('----------------------');
-                    //console.log('key_name = ' + key_name);
-                    var v_name = document.getElementById('inptNameId_'+key_name).value;
-                    var v_value = document.getElementById('inptValueId_'+key_name).value;
-                    //console.log('inptNameId_'+key_name+' = ' + v_name);
-                    //console.log('inptValueId_'+key_name+' = ' + v_value);
-                    DiagramModel.setInputVariable(key_name, v_name, v_value);
-                }
+                saveInputsModel();
                 break;
 
             case modal_form.output_variables_modal:
-                var output_variables = DiagramModel.getOutputVariables();
-                for(var key_name in output_variables) {
-                    var v_name = document.getElementById('outputNameId_'+key_name).value;
-                    var v_value = document.getElementById('outputValueId_'+key_name).value;
-                    DiagramModel.setOutputVariable(key_name, v_name, v_value);
-                }
+                saveOutputsModel();
+                break;
+
+            case modal_form.connection_modal:
+                saveInputsModel();
+                saveOutputsModel();
                 break;
         }
     };
 
+    function saveInputsModel() {
+        let input_variables = DiagramModel.getInputVariables();
+        DiagramModel.clearInputVariables();
+        for(let key_name in input_variables) {
+            //console.log('----------------------');
+            //console.log('key_name = ' + key_name);
+            let v_name = document.getElementById('inptNameId_'+key_name).value;
+            let v_value = document.getElementById('inptValueId_'+key_name).value;
+            //document.getElementById('inputCheckBoxId_'+key_name).id = 'inputCheckBoxId_'+v_name;
+            //console.log('inptNameId_'+key_name+' = ' + v_name);
+            //console.log('inptValueId_'+key_name+' = ' + v_value);
+            DiagramModel.addInputVariable(v_name, v_value);
+        }
+    }
+
+    function saveOutputsModel() {
+        let output_variables = DiagramModel.getOutputVariables();
+        DiagramModel.clearOutputVariables();
+        for(let key_name in output_variables) {
+            let v_name = document.getElementById('outputNameId_'+key_name).value;
+            let v_value = document.getElementById('outputValueId_'+key_name).value;
+            //document.getElementById('outputCheckBoxId_'+key_name).id = 'outputCheckBoxId_'+v_name;
+            DiagramModel.addOutputVariable(v_name, v_value);
+        }
+    }
+
     function create_conn_text() {
         console.log('create_conn_text');
 
-        var conn_input_vars = [];
-        var conn_output_vars = [];
+        let conn_input_vars = [];
+        let conn_output_vars = [];
 
-        var input_variables = DiagramModel.getInputVariables();
-        var input_count = 0;
-        for(var key_name in input_variables) {
+        let input_variables = DiagramModel.getInputVariables();
+        let input_count = 0;
+        for(let key_name in input_variables) {
             console.log('key_name = ' + key_name);
-            var check_box = document.getElementById('inputCheckBoxId_'+key_name);
+            let check_box = document.getElementById('inputCheckBoxId_'+key_name);
             console.log('checkbox = ' + check_box.checked);
             if(check_box.checked) {
-                conn_input_vars.push(key_name);
+                conn_input_vars.push(document.getElementById('inptNameId_'+key_name).value);
                 input_count++;
             }
         }
 
 
-        var output_variables = DiagramModel.getOutputVariables();
+        let output_variables = DiagramModel.getOutputVariables();
 
-        var output_count = 0;
-        for(var key_name in output_variables) {
+        let output_count = 0;
+        for(let key_name in output_variables) {
             console.log('key_name = ' + key_name);
-            var check_box = document.getElementById('outputCheckBoxId_'+key_name);
+            let check_box = document.getElementById('outputCheckBoxId_'+key_name);
             console.log('checkbox = ' + check_box.checked);
             if(check_box.checked) {
-                conn_output_vars.push(key_name);
+                conn_output_vars.push(document.getElementById('outputNameId_'+key_name).value);
                 output_count++;
             }
         }
@@ -207,16 +224,16 @@ function ModalForm() {
 
         controller.selectTool(0);
 
-        save_model_data();
-
-        //console.log('modal_form.conn_index = ' + conn_index);
-
         if(conn_index !== null) {
             create_conn_text();
         }
         else {
             console.log('conn_index undifined!');
         }
+
+        save_model_data();
+
+        //console.log('modal_form.conn_index = ' + conn_index);
 
         remove_view();
 

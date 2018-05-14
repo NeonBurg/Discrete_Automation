@@ -9,8 +9,9 @@ function Controller() {
     var dxToolMoved = 0;
     var firstTouch = false;
 
-    var selected_tool_index = 0;
+    var selected_tool_index = -1;
     var selection_object = null;
+    var hover_object = null;
 
     var connect_mode = false;
 
@@ -20,25 +21,32 @@ function Controller() {
     var node_from = null;
     var node_to = null;
 
+    this.ARROW_TOOL = 0;
+    this.CONNECT_TOOL = 1;
+    this.SAVE_TOOL = 2;
+    this.INPUT_VARS_TOOL = 3;
+    this.OUTPUT_VARS_TOOL = 4;
+    this.PLAY_TOOL = 5;
+
     // ------------------ Перемещение диаграммы ------------------
     this.moveDiagram = function(dx,dy, x, y) {
         this.attr({
             transform: this.data('origTransform') + (this.data('origTransform') ? "T" : "t") + [dx, dy]
         });
 
-        if(firstTouch == true) dxToolMoved = dx;
+        if(firstTouch === true) dxToolMoved = dx;
 
         /*for (var i = connections.length; i--;) {
             snap.create_connection(connections[i]);
         }*/
 
-        for (var i = DiagramModel.getConnectsCount(); i--;) {
+        for (let i = DiagramModel.getConnectsCount(); i--;) {
             snap.create_connection(DiagramModel.getConnectByIndex(i));
         }
 
         //console.log(this.data('origTransform') + (this.data('origTransform') ? "T" : "t") + [dx, dy]);
         //console.log('moving: x = ' + x + " y = " + y);
-    }
+    };
 
     // Начало перемещения диаграммы
     this.startMoveDiagram = function(x, y) {
@@ -53,7 +61,7 @@ function Controller() {
             firstTouch = true;
         }
         //console.log('startmove: x = ' + x + ' | y = ' + y);
-    }
+    };
 
     // ------------------ Конец перемещения диаграммы ------------------
     this.stopMoveDiagram = function(evnt) {
@@ -63,7 +71,7 @@ function Controller() {
                 this.remove();
             }
             else {
-                var sendData = {};
+                let sendData = {};
                 //var types = ['String'];
                 //var names = ['A', 'B', 'C'];
                 sendData.title = 'a'+DiagramModel.getCountDiagrams();
@@ -72,7 +80,7 @@ function Controller() {
             }
             firstTouch = false;
         }
-    }
+    };
 
     // ------------------ Выбор инструмента ------------------------
     this.toolClicked = function () {
@@ -81,78 +89,134 @@ function Controller() {
 
         switch(this.id) {
             case snap.select('#arrowTool').id:
-                if(selected_tool_index !== 0) {
-                    selectTool(0);
-                    //console.log('toolClicked: arrow');
-                }
+                selectTool(controller.getToolType('arrowTool'));
                 break;
             case snap.select('#connectTool').id:
-                if(selected_tool_index !== 1) {
-                    selectTool(1);
-                    //console.log('toolClicked: connect');
-                }
+                selectTool(controller.getToolType('connectTool'));
                 break;
             case snap.select('#saveTool').id:
-                if(selected_tool_index !== 2) {
-                    selectTool(2);
-                }
+                selectTool(controller.getToolType('saveTool'));
                 break;
             case snap.select('#variablesTool').id:
-                if(selected_tool_index !== 3) {
-                    modal_form.showModalDialog(modal_form.input_variables_modal);
-                    selectTool(3);
-                }
+                selectTool(controller.getToolType('variablesTool'));
                 break;
             case snap.select('#outputsTool').id:
-                if(selected_tool_index !== 4) {
-                    modal_form.showModalDialog(modal_form.output_variables_modal);
-                    selectTool(4);
-                }
+                selectTool(controller.getToolType('outputsTool'));
+                break;
+            case snap.select('#playTool').id:
+                selectTool(controller.getToolType('playTool'));
                 break;
         }
-    }
+    };
 
-    // Выделение инструмента цветным кружком
+    // Выделение инструмента цветом
     function selectTool(index) {
 
-        var toolDrawable = null;
+        console.log('select_tool: ' + index + ' | selected_tool_index = ' + selected_tool_index);
 
-        switch(index) {
-            case 0:
-                onArrowToolSelected();
-                toolDrawable = snap.select('#arrowTool');
-                break;
-            case 1:
-                onConnectToolSelected();
-                toolDrawable = snap.select('#connectTool');
-                break;
-            case 2:
-                onSaveToolSelected();
-                toolDrawable = snap.select('#saveTool');
-                break;
-            case 3:
-                toolDrawable = snap.select('#variablesTool');
-                break;
-            case 4:
-                toolDrawable = snap.select('#outputsTool');
-                break;
+        if(selected_tool_index !== index) {
+            let toolDrawable = null;
+
+            switch (index) {
+                case controller.ARROW_TOOL:
+                    onArrowToolSelected();
+                    toolDrawable = snap.select('#arrowTool');
+                    break;
+                case controller.CONNECT_TOOL:
+                    onConnectToolSelected();
+                    toolDrawable = snap.select('#connectTool');
+                    break;
+                case controller.SAVE_TOOL:
+                    onSaveToolSelected();
+                    toolDrawable = snap.select('#saveTool');
+                    break;
+                case controller.INPUT_VARS_TOOL:
+                    onInputVarsSelected();
+                    toolDrawable = snap.select('#variablesTool');
+                    break;
+                case controller.OUTPUT_VARS_TOOL:
+                    onOutputVarsSelected();
+                    toolDrawable = snap.select('#outputsTool');
+                    break;
+                case controller.PLAY_TOOL:
+                    onPlayToolSelected();
+                    toolDrawable = snap.select('#playTool');
+                    break;
+            }
+
+            if (selection_object) {
+                unselectTool(selected_tool_index);
+            }
+            let t_x = toolDrawable.getBBox().x;
+            let t_y = toolDrawable.getBBox().y;
+            selection_object = snap.rect(t_x - 9, t_y - 4, 49, 39).attr({fill: "#b5b5b5"});
+            selection_object.after(toolDrawable);
+            selected_tool_index = index;
         }
-
-        if(selection_object) unselectTool();
-        selected_tool_index = index;
-        var t_x = toolDrawable.getBBox().x;
-        var t_y = toolDrawable.getBBox().y;
-        selection_object = snap.rect(t_x-9, t_y-4, 47, 39).attr({fill:"#b5b5b5"});
-        selection_object.after(toolDrawable);
-        selected_tool_index = index;
     }
 
     this.selectTool = function(index) {
         selectTool(index);
     };
 
+    // Выделение инструмента цветом при наведении мыши
+    this.toolHovered = function() {
+        //console.log('toolHovered');
+        let toolDrawable = null;
+        let tool_type;
+        let tool_drawable_id = '';
+
+        switch(this.id) {
+            case snap.select('#arrowTool').id:
+                tool_drawable_id = 'arrowTool';
+                break;
+            case snap.select('#connectTool').id:
+                tool_drawable_id = 'connectTool';
+                break;
+            case snap.select('#saveTool').id:
+                tool_drawable_id = 'saveTool';
+                break;
+            case snap.select('#variablesTool').id:
+                tool_drawable_id = 'variablesTool';
+                break;
+            case snap.select('#outputsTool').id:
+                tool_drawable_id = 'outputsTool';
+                break;
+            case snap.select('#playTool').id:
+                tool_drawable_id = 'playTool';
+                break;
+        }
+
+        toolDrawable = snap.select('#'+tool_drawable_id);
+        tool_type = controller.getToolType(tool_drawable_id);
+
+        let t_x = toolDrawable.getBBox().x;
+        let t_y = toolDrawable.getBBox().y;
+
+        if(tool_type !== selected_tool_index) {
+            hover_object = snap.rect(t_x - 9, t_y - 4, 49, 39).attr({fill: "#e2e2e2"});
+            hover_object.after(toolDrawable);
+        }
+
+        document.body.style.cursor = "pointer";
+    };
+
+    // Выделение инструмента цветом при наведении мыши
+    this.toolUnHovered = function() {
+        //console.log('toolUnHovered');
+        if(hover_object) {
+            //snap.select('#selection_object').remove();
+            hover_object.remove();
+            hover_object = null;
+            document.body.style.cursor = "auto";
+        }
+    };
+
+
+    // ----------- Функции выполняемые при выборе инструмента --------------
+
     function onArrowToolSelected() {
-        if(connect_mode) connectModeOff();
+        //if(connect_mode) connectModeOff();
     }
 
     // Выбран инструмент 'Соединение'
@@ -161,45 +225,19 @@ function Controller() {
     }
 
     function onSaveToolSelected() {
-        var connections_data = DiagramModel.getConnects();
-
         modal_form.showModalDialog(modal_form.save_diagram_modal);
+    }
 
-        /*for(var i=0; i<connections_data.length; i++) {
-            console.log('---------------------');
-            console.log('connection: ' + i);
-            var input_vars = connections_data[i].inputVariables;
-            var output_vars = connections_data[i].outputVariables;
-            var input_vars_text = '';
-            var output_vars_text = '';
-            for(var j=0; j<input_vars.length; j++) {
-                input_vars_text += input_vars[j] + ' | ';
-            }
-            for(var j=0; j<output_vars.length; j++) {
-                output_vars_text += output_vars[j];
-            }
-            console.log('inputs: ' + input_vars_text);
-            console.log('outputs: ' + output_vars_text);
-        }
+    function onInputVarsSelected() {
+        modal_form.showModalDialog(modal_form.input_variables_modal);
+    }
 
-        var projectName = 'test2';
+    function onOutputVarsSelected() {
+        modal_form.showModalDialog(modal_form.output_variables_modal);
+    }
 
-        $.get("/getProjectsNamesList", {}, function(response) {
-            var projects_filenames = JSON.parse(response);
-            var filename_unique = true;
-
-            for(var i=0; i<projects_filenames.length; i++) {
-                //console.log('pName = ' +pName + ' | pName = ' + projectName);
-                if(pName === projects_filenames[i]) filename_unique = false;
-            }
-
-            if(filename_unique) {
-                $.post("/saveProject", {pName: projectName, pData: JSON.stringify(connections_data)}, onFileWriteSuccess);
-            }
-            else {
-                console.log('project \''+projectName+'\' already exist!');
-            }
-        });*/
+    function onPlayToolSelected() {
+        startDiscreteAuto();
     }
 
     this.chooseTool = function (index) {
@@ -207,14 +245,27 @@ function Controller() {
     };
 
     // Снимаем выделение инструмента
-    function unselectTool() {
+    function unselectTool(selection_index) {
+
+        //console.log('unselectTool: ' + selection_index);
+
+        switch(selection_index) {
+            case 1:
+                connectModeOff();
+                break;
+            case 5:
+                stopDiscreteAuto();
+                break;
+        }
+
         selection_object.remove();
+        selection_object = null;
     }
 
     function connectModeOn() {
         connect_mode = true;
-        for(var i=0; i<controller.GetCountElements(); i++) {
-            var diagramDrawable = controller.GetDrawableByIndex(i);
+        for(let i=0; i<controller.GetCountElements(); i++) {
+            let diagramDrawable = controller.GetDrawableByIndex(i);
             diagramDrawable.attr({class: "connectable"});
             diagramDrawable.undrag();
             diagramDrawable.drag(controller.movingConn, controller.startMoveConn, controller.stopMoveConn);
@@ -225,8 +276,8 @@ function Controller() {
 
     function connectModeOff() {
         connect_mode = false;
-        for(var i=0; i<controller.GetCountElements(); i++) {
-            var diagramDrawable = controller.GetDrawableByIndex(i);
+        for(let i=0; i<controller.GetCountElements(); i++) {
+            let diagramDrawable = controller.GetDrawableByIndex(i);
             diagramDrawable.attr({class: "draggable"});
             diagramDrawable.undrag();
             diagramDrawable.drag(controller.moveDiagram, controller.startMoveDiagram, controller.stopMoveDiagram);
@@ -291,32 +342,6 @@ function Controller() {
 
             if(node_from !== node_to) {
 
-                /*var drawable_from = DiagramModel.getDrawableByIndex(node_from);
-                var drawable_to = DiagramModel.getDrawableByIndex(node_to);
-
-                var node_data = DiagramModel.getDataByIndex(node_to);
-                console.log('drawable_from data: ' + JSON.stringify(node_data));
-
-                var removeConnIndex = -1;
-
-                // Проверка создания противоположенно направленных связей между узлами
-                var connectsToArr = node_data.connectsTo;
-                for (var i = 0; i < connectsToArr.length; i++) {
-                    if (connectsToArr[i] === node_from) {
-                        console.log('connectsToArr[i]: ' + connectsToArr[i] + ' | node_from: ' + node_from);
-                        removeConnIndex = node_data.connectsToIndexes[i];
-                        console.log('delete conn: ' + removeConnIndex);
-                    }
-                }
-
-                var connection = snap.create_connection(drawable_from.select('.nodeCircle'), drawable_to.select('.nodeCircle'), 'black');
-
-                if (removeConnIndex !== -1) {
-                    snap.split_double_connections(DiagramModel.getConnectByIndex(removeConnIndex), connection);
-                }
-
-                DiagramModel.addConnect(drawable_from.id, drawable_to.id, connection);*/
-
                 connectNodes(node_from, node_to);
 
                 modal_form.showModalDialog(modal_form.connection_modal, DiagramModel.getConnectsCount()-1);
@@ -330,17 +355,17 @@ function Controller() {
 
     // ---------- Создаем связь между узлами -----------
     function connectNodes(node_from, node_to) {
-        var drawable_from = DiagramModel.getDrawableByIndex(node_from);
-        var drawable_to = DiagramModel.getDrawableByIndex(node_to);
+        let drawable_from = DiagramModel.getDrawableByIndex(node_from);
+        let drawable_to = DiagramModel.getDrawableByIndex(node_to);
 
-        var node_data = DiagramModel.getDataByIndex(node_to);
+        let node_data = DiagramModel.getDataByIndex(node_to);
         console.log('drawable_from data: ' + JSON.stringify(node_data));
 
-        var removeConnIndex = -1;
+        let removeConnIndex = -1;
 
         // Проверка создания противоположенно направленных связей между узлами
-        var connectsToArr = node_data.connectsTo;
-        for (var i = 0; i < connectsToArr.length; i++) {
+        let connectsToArr = node_data.connectsTo;
+        for (let i = 0; i < connectsToArr.length; i++) {
             if (connectsToArr[i] === node_from) {
                 console.log('connectsToArr[i]: ' + connectsToArr[i] + ' | node_from: ' + node_from);
                 removeConnIndex = node_data.connectsToIndexes[i];
@@ -348,29 +373,29 @@ function Controller() {
             }
         }
 
-        var connection = snap.create_connection(drawable_from.select('.nodeCircle'), drawable_to.select('.nodeCircle'), 'black');
+        let connection = snap.create_connection(drawable_from.select('.nodeCircle'), drawable_to.select('.nodeCircle'), 'black');
 
         if (removeConnIndex !== -1) {
             snap.split_double_connections(DiagramModel.getConnectByIndex(removeConnIndex), connection);
         }
 
         DiagramModel.addConnect(drawable_from.id, drawable_to.id, connection);
-    };
+    }
 
     // ----------------- Сохраняем/Загружаем проект --------------------
     this.save_project_clicked = function() {
-        var project_name = $('#ProjNameInput').val();
+        let project_name = $('#ProjNameInput').val();
         //console.log('save_project func: pName = ' + pName);
         $.post("/getIsProjectNameUnique", {pName: project_name}, function(response) {
             if(response === 'true') {
                 console.log('response = ' + response);
-                var graph_data_save = DiagramModel.getAllData();
-                var input_variables_save = DiagramModel.getInputVariables();
-                var output_variables_save = DiagramModel.getOutputVariables();
-                var connections_data_save = DiagramModel.getConnects();
+                let graph_data_save = DiagramModel.getAllData();
+                let input_variables_save = DiagramModel.getInputVariables();
+                let output_variables_save = DiagramModel.getOutputVariables();
+                let connections_data_save = DiagramModel.getConnects();
 
-                var xPos, yPos;
-                for(var id in graph_data_save) {
+                let xPos, yPos;
+                for(let id in graph_data_save) {
                     //console.log('id: ' + id);
                     xPos = DiagramModel.getDrawableById(id).getBBox().x;
                     yPos = DiagramModel.getDrawableById(id).getBBox().y;
@@ -382,7 +407,7 @@ function Controller() {
                     }
                 }
 
-                var project_data = {graphData: JSON.stringify(graph_data_save),
+                let project_data = {graphData: JSON.stringify(graph_data_save),
                                     inputVariables: JSON.stringify(input_variables_save),
                                     outputVariables: JSON.stringify(output_variables_save),
                                     connectionsData: JSON.stringify(connections_data_save)};
@@ -397,20 +422,20 @@ function Controller() {
 
 
     this.load_project_clicked = function() {
-        var project_name = $('#ProjSelect').val();
+        let project_name = $('#ProjSelect').val();
         $.post("/readProjectFile", {pFileName: project_name}, function(response) {
 
             if(response !== 'false') {
                 //console.log(response);
                 clearAll();
 
-                var project_data = JSON.parse(response);
+                let project_data = JSON.parse(response);
                 project_data = JSON.parse(project_data.pData);
 
-                var graph_data_load = JSON.parse(project_data.graphData);
-                var input_variables_load = JSON.parse(project_data.inputVariables);
-                var output_variables_load = JSON.parse(project_data.outputVariables);
-                var connections_data_load = JSON.parse(project_data.connectionsData);
+                let graph_data_load = JSON.parse(project_data.graphData);
+                let input_variables_load = JSON.parse(project_data.inputVariables);
+                let output_variables_load = JSON.parse(project_data.outputVariables);
+                let connections_data_load = JSON.parse(project_data.connectionsData);
 
                 console.log(connections_data_load);
 
@@ -418,25 +443,25 @@ function Controller() {
                 DiagramModel.setOutputVariablesList(output_variables_load);
 
 
-                for(var key in graph_data_load) {
+                for(let key in graph_data_load) {
                     //console.log('graph_data_load[key] = ' + graph_data_load[key]);
-                    var xPos = graph_data_load[key].position[0];
-                    var yPos = graph_data_load[key].position[1];
+                    let xPos = graph_data_load[key].position[0];
+                    let yPos = graph_data_load[key].position[1];
 
-                    var diagramDrawable = createAutomationElementAtPos(xPos, yPos);
+                    let diagramDrawable = createAutomationElementAtPos(xPos, yPos);
                     AddDiagram(diagramDrawable, graph_data_load[key]);
                 }
 
-                var node_from_index = 0;
-                for(var key in graph_data_load) {
-                    var connects_to_list = graph_data_load[key].connectsTo;
+                let node_from_index = 0;
+                for(let key in graph_data_load) {
+                    let connects_to_list = graph_data_load[key].connectsTo;
 
                     console.log('node_from_index = ' + node_from_index);
                     console.log('connects_to_list = ' + connects_to_list);
 
-                    for(var key2 in connects_to_list) {
-                        var node_to_index = connects_to_list[key2];
-                        var connect_to_index = graph_data_load[key].connectsToIndexes[key2];
+                    for(let key2 in connects_to_list) {
+                        let node_to_index = connects_to_list[key2];
+                        let connect_to_index = graph_data_load[key].connectsToIndexes[key2];
                         console.log('connect_nodes: from = ' + node_from_index + ' | to = ' + node_to_index + ' | connect_to_index = ' + connect_to_index);
                         connectNodes(node_from_index, node_to_index);
                         /*var inputVars = connections_data_load[connect_to_index].inputVariables;
@@ -446,12 +471,12 @@ function Controller() {
                     node_from_index++;
                 }
 
-                for(var key in graph_data_load) {
-                    var connectsToIndexes = graph_data_load[key].connectsToIndexes;
-                    for (var key2 in connectsToIndexes) {
-                        var connect_to_index = connectsToIndexes[key2];
+                for(let key in graph_data_load) {
+                    let connectsToIndexes = graph_data_load[key].connectsToIndexes;
+                    for (let key2 in connectsToIndexes) {
+                        let connect_to_index = connectsToIndexes[key2];
                         inputVars = connections_data_load[connect_to_index].inputVariables;
-                        var outputVars = connections_data_load[connect_to_index].outputVariables;
+                        let outputVars = connections_data_load[connect_to_index].outputVariables;
                         controller.setConnectionVariables(connect_to_index, inputVars, outputVars);
                     }
                 }
@@ -466,12 +491,12 @@ function Controller() {
 
     function onFileWriteSuccess(response) {
         console.log('fw_response: ' + response);
-        var err_msg_elem = $('#error_msg_save');
+        let err_msg_elem = $('#error_msg_save');
         if(response === 'true') {
             err_msg_elem.css("color", "green");
             err_msg_elem.text("Проект успешно сохранен");
             DiagramModel.current_project_name = $('#ProjNameInput').val();
-            var projSel = document.getElementById('ProjSelect');
+            let projSel = document.getElementById('ProjSelect');
             DiagramModel.current_project_index = projSel.options.length;
             projSel.options[DiagramModel.current_project_index] = (new Option(DiagramModel.current_project_name, DiagramModel.current_project_name));
             projSel.options[DiagramModel.current_project_index].selected = true;
@@ -486,8 +511,8 @@ function Controller() {
     function clearAll() {
         console.log('clearAll()');
         // Удаляем связи
-        var connections = DiagramModel.getConnects();
-        for(var i=0; i<connections.length; i++) {
+        let connections = DiagramModel.getConnects();
+        for(let i=0; i<connections.length; i++) {
             connections[i].connection.line.remove();
             connections[i].connection.text_element.remove();
             connections[i].connection.arrow_line1.remove();
@@ -496,13 +521,54 @@ function Controller() {
         DiagramModel.clearConnects();
 
         // Удаляем объекты
-        var diagramsCount = DiagramModel.getCountDiagrams();
-        for(var i=0; i<diagramsCount; i++) {
+        let diagramsCount = DiagramModel.getCountDiagrams();
+        for(let i=0; i<diagramsCount; i++) {
             DiagramModel.removeDiagramByIndex(i);
         }
         DiagramModel.clearIndexes();
     }
 
+    // -----------------------------------------------------------------
+
+
+    // ------------------- Управление терминалом -----------------------
+    function startDiscreteAuto() {
+        console.log('startDiscreteAuto');
+        discreteAuto = new DiscreteAuto();
+
+        let graph_arr = DiagramModel.getAllData();
+        let conn_arr = DiagramModel.getConnects();
+        let inputs_arr = DiagramModel.getInputVariables();
+        let outputs_arr = DiagramModel.getOutputVariables();
+
+        if(discreteAuto.init(graph_arr, conn_arr, inputs_arr, outputs_arr)) {
+            let playTool = snap.select('#playTool');
+            let t_x = playTool.getBBox().x;
+            let t_y = playTool.getBBox().y;
+            playTool.remove();
+            playTool = snap.image("img/stop-button.svg", t_x, t_y, 30, 30).attr({id: "playTool"});
+            playTool.click(controller.toolClicked);
+            playTool.hover(controller.toolHovered, controller.toolUnHovered);
+        }
+        else {
+            discreteAuto = null;
+        }
+    }
+
+    function stopDiscreteAuto() {
+
+        console.log('stopDiscreteAuto');
+
+        if(discreteAuto !== null) {
+            let playTool = snap.select('#playTool');
+            let t_x = playTool.getBBox().x;
+            let t_y = playTool.getBBox().y;
+            playTool.remove();
+            playTool = snap.image("img/play-button.svg", t_x, t_y, 30, 30).attr({id: "playTool"});
+            playTool.click(controller.toolClicked);
+            playTool.hover(controller.toolHovered, controller.toolUnHovered);
+        }
+    }
     // -----------------------------------------------------------------
 
 
@@ -512,21 +578,20 @@ function Controller() {
     };
 
     this.setConnectionVariables = function(_connIndex, _inputVariables, _outputVariables) {
-        var connection_text = '';
 
         console.log('create_conn_text');
-        var connection_text = '';
+        let connection_text = '';
 
-        var input_count = 0;
-        for(var key_name in _inputVariables) {
+        let input_count = 0;
+        for(let key_name in _inputVariables) {
             connection_text += _inputVariables[key_name] + ', ';
             input_count++;
         }
         if(input_count > 0) connection_text = connection_text.substring(0, connection_text.length - 2); // Удалим последнею запятую после переменной
 
-        var output_vars_text = '';
-        var output_count = 0;
-        for(var key_name in _outputVariables) {
+        let output_vars_text = '';
+        let output_count = 0;
+        for(let key_name in _outputVariables) {
             output_vars_text += _outputVariables[key_name] + ', ';
             output_count++;
         }
@@ -569,7 +634,26 @@ function Controller() {
 
     this.testShow = function() {
         terminal.sendToTerminal("testShow(): hello from controller!")
-    }
+    };
+
+    this.getToolType = function(drawable_id) {
+        switch(drawable_id) {
+            case 'arrowTool':
+                return this.ARROW_TOOL;
+            case 'connectTool':
+                return this.CONNECT_TOOL;
+            case 'saveTool':
+                return this.SAVE_TOOL;
+            case 'variablesTool':
+                return this.INPUT_VARS_TOOL;
+            case 'outputsTool':
+                return this.OUTPUT_VARS_TOOL;
+            case 'playTool':
+                return this.PLAY_TOOL;
+            default:
+                return -1;
+        }
+    };
 }
 
 // ------------------- Остальные методы ------------------------

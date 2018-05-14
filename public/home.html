@@ -12,16 +12,19 @@
     <script type="text/javascript" src="js/FlowChartScripts/SnapModel.js"></script>
     <script type="text/javascript" src="js/add_variable.js"></script>
     <script type="text/javascript" src="js/terminal.js"></script>
+    <script type="text/javascript" src="js/DiscreteAuto.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/style.css">
 
     <script type="text/javascript">
 
         var terminal;
+        var discreteAuto = null;
 
         jQuery(document).ready(function($) {
 
             terminal = new Terminal();
+            //discreteAuto = new DiscreteAuto();
 
             $("#terminal-input").keyup(function(event){
                 if(event.keyCode === 13) {
@@ -38,6 +41,8 @@
             var terminalInput = $('#terminal-input');
 
             terminal.sendToTerminal(terminalInput.val(), terminal.USER_MSG_TYPE);
+            //discreteAuto.sendInput(terminalInput.val());
+
             terminalInput.val('');
         }
 

@@ -38,17 +38,39 @@ function createToolsMenuBlock() {
         strokeWidth: 0.5,
         stroke: "#000"
     });
+
     var arrow_img = snap.image("/img/arrow.svg", leftSide_w + 10, 5, 30, 30).attr({id: "arrowTool"});
+
     var connect_img = snap.image("/img/connection.svg", leftSide_w + 60, 5, 30, 30).attr({id: "connectTool"});
     var save_img = snap.image("/img/save.svg", leftSide_w + 110, 5, 30, 30).attr({id: "saveTool"});
     var variables_img = snap.image("/img/variables.svg", leftSide_w + 160, 5, 30, 30).attr({id: "variablesTool"});
     var outputs_img = snap.image("/img/outputs.svg", leftSide_w + 210, 5, 30, 30).attr({id: "outputsTool"});
+    var play_img = snap.image("img/play-button.svg", leftSide_w + 260, 5, 30, 30).attr({id: "playTool"});
+
     arrow_img.click(controller.toolClicked);
     connect_img.click(controller.toolClicked);
     save_img.click(controller.toolClicked);
     variables_img.click(controller.toolClicked);
     outputs_img.click(controller.toolClicked);
-    controller.chooseTool(0);
+    play_img.click(controller.toolClicked);
+
+    arrow_img.hover(controller.toolHovered, controller.toolUnHovered);
+    connect_img.hover(controller.toolHovered, controller.toolUnHovered);
+    save_img.hover(controller.toolHovered, controller.toolUnHovered);
+    variables_img.hover(controller.toolHovered, controller.toolUnHovered);
+    outputs_img.hover(controller.toolHovered, controller.toolUnHovered);
+    play_img.hover(controller.toolHovered, controller.toolUnHovered);
+
+
+
+/*arrow_img.hover(controller.toolHovered);
+connect_img.hover(controller.toolHovered);
+save_img.hover(controller.toolHovered);
+variables_img.hover(controller.toolHovered);
+outputs_img.hover(controller.toolHovered);
+play_img.hover(controller.toolHovered);*/
+
+controller.chooseTool(0);
 }
 
 // Левая сторона со списком инструментов
@@ -59,10 +81,10 @@ function createLeftToolsMenu() {
         fill: "#ffffff",
         pointerEvents: "none"
     });
-}
+    }
 
-// Элементы автомата
-function createAutomationElement(_elementBefore) {
+    // Элементы автомата
+    function createAutomationElement(_elementBefore) {
     var cx = leftSide_w/2;
     var cy = menu_title_block_height+toolsPadding+rectTool_s;
 
@@ -121,12 +143,12 @@ function createAutomationElementAtPos(_xPos, _yPos) {
 // ------------------=============* Отрисовка графики *=============------------------
 // Сетка
 for (var i = 0; i < horLinesAmount; i++) {
-    var y1 = i * cellSize;
-    var horLine = snap.line(leftSide_w, y1, scr_w * 2, y1).attr({stroke: "#d2d2d2", strokeWidth: 1});
+var y1 = i * cellSize;
+var horLine = snap.line(leftSide_w, y1, scr_w * 2, y1).attr({stroke: "#d2d2d2", strokeWidth: 1});
 }
 for (var i = 0; i < vertLinesAmount; i++) {
-    var x1 = i * cellSize + leftSide_w;
-    var vertLine = snap.line(x1, 0, x1, scr_h * 2).attr({stroke: "#d2d2d2", strokeWidth: 1});
+var x1 = i * cellSize + leftSide_w;
+var vertLine = snap.line(x1, 0, x1, scr_h * 2).attr({stroke: "#d2d2d2", strokeWidth: 1});
 }
 createToolsMenuBlock();
 createLeftToolsMenu();

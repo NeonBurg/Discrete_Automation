@@ -123,6 +123,7 @@ var DiagramModel = {
     },
 
     setInputVariable: function(key_name, name, value) {
+        //console.log('set_input_variable: key_name=' + key_name + ' | name='+name+' | value='+value);
         delete this.input_variables[key_name];
         this.input_variables[name] = value;
     },
@@ -146,6 +147,10 @@ var DiagramModel = {
 
     removeInputVariable: function(key_name) {
         delete this.input_variables[key_name];
+    },
+
+    clearInputVariables: function() {
+          this.input_variables = {};
     },
 
     // --------------- OUTPUT Variables methods -------------------
@@ -178,5 +183,9 @@ var DiagramModel = {
 
     removeOutputVariable: function(key_name) {
         delete this.output_variables[key_name];
+    },
+
+    clearOutputVariables: function() {
+        this.output_variables = {};
     }
 }

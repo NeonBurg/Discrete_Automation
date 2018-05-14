@@ -33,16 +33,16 @@ function Terminal() {
         terminalScrollbar.append(new_text_element);
 
         this.scrollDown();
-    }
+    };
 
     this.scrollDown = function() {
         var terminalScrollbar = $('#terminal-vertical-scrollbar');
         terminalScrollbar.scrollTop(terminalScrollbar[0].scrollHeight);
-    }
+    };
 
     this.clearTerminal = function() {
         document.getElementById('terminal-vertical-scrollbar').textContent = '';
-    }
+    };
 
     function get_curr_time() {
         var d = new Date();
