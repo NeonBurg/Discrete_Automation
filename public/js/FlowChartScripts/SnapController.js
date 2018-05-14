@@ -385,14 +385,17 @@ function Controller() {
     // ----------------- Сохраняем/Загружаем проект --------------------
     this.save_project_clicked = function() {
         let project_name = $('#ProjNameInput').val();
-        //console.log('save_project func: pName = ' + pName);
+        console.log('save_project func: pName = ' + project_name);
         $.post("/getIsProjectNameUnique", {pName: project_name}, function(response) {
             if(response === 'true') {
                 console.log('response = ' + response);
                 let graph_data_save = DiagramModel.getAllData();
                 let input_variables_save = DiagramModel.getInputVariables();
                 let output_variables_save = DiagramModel.getOutputVariables();
-                let connections_data_save = DiagramModel.getConnects();
+                let connections_data_save = DiagramModel.getConnectsData();
+
+                console.log('graph_arr = ' + JSON.stringify(graph_data_save));
+                console.log('connections_arr = ' + JSON.stringify(connections_data_save));
 
                 let xPos, yPos;
                 for(let id in graph_data_save) {
@@ -452,34 +455,20 @@ function Controller() {
                     AddDiagram(diagramDrawable, graph_data_load[key]);
                 }
 
-                let node_from_index = 0;
-                for(let key in graph_data_load) {
-                    let connects_to_list = graph_data_load[key].connectsTo;
 
-                    console.log('node_from_index = ' + node_from_index);
-                    console.log('connects_to_list = ' + connects_to_list);
-
-                    for(let key2 in connects_to_list) {
-                        let node_to_index = connects_to_list[key2];
-                        let connect_to_index = graph_data_load[key].connectsToIndexes[key2];
-                        console.log('connect_nodes: from = ' + node_from_index + ' | to = ' + node_to_index + ' | connect_to_index = ' + connect_to_index);
-                        connectNodes(node_from_index, node_to_index);
-                        /*var inputVars = connections_data_load[connect_to_index].inputVariables;
-                        var outputVars = connections_data_load[connect_to_index].outputVariables;
-                        controller.setConnectionVariables(connect_to_index, inputVars, outputVars);*/
-                    }
-                    node_from_index++;
+                for(let conn_index in connections_data_load) {
+                    //console.log('---> conn_index = ' + conn_index);
+                    //console.log(JSON.stringify(connections_data_load[conn_index]));
+                    let node_from_index = connections_data_load[conn_index].fromDrawableIndex;
+                    let node_to_index = connections_data_load[conn_index].toDrawableIndex;
+                    connectNodes(node_from_index, node_to_index);
+                    let inputVars = connections_data_load[conn_index].inputVariables;
+                    let outputVars = connections_data_load[conn_index].outputVariables;
+                    //console.log('node_from_index = ' + node_from_index);
+                    //console.log('node_to_index = ' + node_to_index);
+                    controller.setConnectionVariables(conn_index, inputVars, outputVars);
                 }
 
-                for(let key in graph_data_load) {
-                    let connectsToIndexes = graph_data_load[key].connectsToIndexes;
-                    for (let key2 in connectsToIndexes) {
-                        let connect_to_index = connectsToIndexes[key2];
-                        inputVars = connections_data_load[connect_to_index].inputVariables;
-                        let outputVars = connections_data_load[connect_to_index].outputVariables;
-                        controller.setConnectionVariables(connect_to_index, inputVars, outputVars);
-                    }
-                }
             }
             else {
                 $('#err_msg_load').text("Ошибка загрузки проекта");

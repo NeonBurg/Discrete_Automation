@@ -87,7 +87,7 @@ var DiagramModel = {
         this.data[_fromDrawableId].connectsTo.push(this.getIndexByDrawableId(_toDrawableId));
         this.data[_toDrawableId].connectsFrom.push(this.getIndexByDrawableId(_fromDrawableId));
 
-        this.connects.push({'connection' : _connection, 'inputVariables' : '', 'outputVariables' : ''});
+        this.connects.push({'connection' : _connection, 'inputVariables' : '', 'outputVariables' : '', 'fromDrawableIndex' : this.getIndexByDiagramId(_fromDrawableId), 'toDrawableIndex' : this.getIndexByDiagramId(_toDrawableId)});
         //this.connects.push({'connection' : _connection});
         this.data[_fromDrawableId].connectsToIndexes.push(this.connects.length-1);
     },
@@ -98,6 +98,17 @@ var DiagramModel = {
 
     getConnectDataByIndex: function(_index) {
         return this.connects[_index];
+    },
+
+    getConnectsData : function() {
+        let connects_data = [];
+        for(let key in this.connects) {
+            connects_data.push({'inputVariables' : this.connects[key].inputVariables,
+                            'outputVariables' : this.connects[key].outputVariables,
+                            'fromDrawableIndex' : this.connects[key].fromDrawableIndex,
+                            'toDrawableIndex' : this.connects[key].toDrawableIndex});
+        }
+        return connects_data;
     },
 
     getConnectByIndex: function(_index) {

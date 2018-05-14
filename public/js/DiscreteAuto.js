@@ -14,7 +14,10 @@ function DiscreteAuto() {
 
     this.init = function(graph_arr, connections_arr, input_variables, output_variables) {
 
-
+        console.log('graph_arr = ' + JSON.stringify(graph_arr));
+        console.log('connections_arr = ' + JSON.stringify(graph_arr));
+        //console.log('input_variables = ' + JSON.stringify(input_variables));
+        //console.log('output_variables = ' + JSON.stringify(output_variables));
 
         return true;
     };
