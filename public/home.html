@@ -41,6 +41,7 @@
             var terminalInput = $('#terminal-input');
 
             terminal.sendToTerminal(terminalInput.val(), terminal.USER_MSG_TYPE);
+            controller.sendTerminalCommand(terminalInput.val());
             //discreteAuto.sendInput(terminalInput.val());
 
             terminalInput.val('');

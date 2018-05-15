@@ -526,7 +526,7 @@ function Controller() {
         discreteAuto = new DiscreteAuto();
 
         let graph_arr = DiagramModel.getAllData();
-        let conn_arr = DiagramModel.getConnects();
+        let conn_arr = DiagramModel.getConnectsData();
         let inputs_arr = DiagramModel.getInputVariables();
         let outputs_arr = DiagramModel.getOutputVariables();
 
@@ -538,6 +538,10 @@ function Controller() {
             playTool = snap.image("img/stop-button.svg", t_x, t_y, 30, 30).attr({id: "playTool"});
             playTool.click(controller.toolClicked);
             playTool.hover(controller.toolHovered, controller.toolUnHovered);
+
+            discreteAuto.start();
+            terminal.sendToTerminal('Дискретный автомат был успешно запущен', terminal.SUCCESS_MSG_TYPE);
+            terminal.sendToTerminal('Введите входное значение:');
         }
         else {
             discreteAuto = null;
@@ -556,8 +560,27 @@ function Controller() {
             playTool = snap.image("img/play-button.svg", t_x, t_y, 30, 30).attr({id: "playTool"});
             playTool.click(controller.toolClicked);
             playTool.hover(controller.toolHovered, controller.toolUnHovered);
+
+            discreteAuto.stop();
         }
     }
+
+    this.sendTerminalCommand = function(_command) {
+        if(discreteAuto !== null && discreteAuto.is_started) {
+            terminal.sendToTerminal('lastState: ' + discreteAuto.getCurrentState());
+            if(discreteAuto.sendInput(_command)) {
+                terminal.sendToTerminal('currState: ' + discreteAuto.getCurrentState() + ' | currOutputKey: ' + discreteAuto.getCurrentOutputKey());
+                terminal.sendToTerminal('out: ' + discreteAuto.getCurrentOutputValue());
+            }
+            else {
+                let err_msg_list = discreteAuto.getErrorMsgs();
+                for(let err_msg_key in err_msg_list) {
+                    terminal.sendToTerminal(err_msg_list[err_msg_key], terminal.ERROR_MSG_TYPE);
+                }
+                discreteAuto.clearErrorMsgs();
+            }
+        }
+    };
     // -----------------------------------------------------------------
 
 
