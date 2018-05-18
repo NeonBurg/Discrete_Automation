@@ -8,12 +8,22 @@ var DiagramModel = {
     output_variables: {},
     current_project_name: '',
     current_project_index: -1,
+    start_diagram_index: -1,
+    end_diagram_index: -1,
 
     setData: function(_drawableId, _data) {
         //this.data[_drawable.id] = {'title': _data.title, 'content': _data.content};
 
         //this.data[_drawableId] = {'title': _data.title, 'types': _data.types, 'names': _data.names};
         this.data[_drawableId].title = _data.title;
+    },
+
+    setStartDiagramIndex: function(_diagramIndex) {
+        this.start_diagram_index = _diagramIndex;
+    },
+
+    setEndDiagramIndex: function(_diagramIndex) {
+        this.end_diagram_index = _diagramIndex;
     },
 
     addData: function(_drawable, _data) {
@@ -48,6 +58,10 @@ var DiagramModel = {
 
     getDrawableByIndex: function(_index) {
         return this.drawable[this.id_list[_index]];
+    },
+
+    getNodeTitleByIndex: function(_index) {
+        return this.getDataByIndex(_index).title;
     },
 
     getCountDiagrams: function() {
@@ -125,6 +139,14 @@ var DiagramModel = {
 
     clearConnects: function() {
         this.connects.splice(0, this.connects.length);
+    },
+
+    getStartDiagramIndex: function() {
+        return this.start_diagram_index;
+    },
+
+    getEndDiagramIndex: function() {
+        return this.end_diagram_index;
     },
 
     // ---------------- INPUT Variables methods --------------------

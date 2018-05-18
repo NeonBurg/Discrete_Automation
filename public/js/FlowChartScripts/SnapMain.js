@@ -33,19 +33,19 @@ var modal_form = new ModalForm();
 
 // Верхний блок меню с выбором инструмента
 function createToolsMenuBlock() {
-    var menuBlock = snap.rect(leftSide_w + 0.5, 0.5, scr_w - leftSide_w - 1, 40).attr({
+    let menuBlock = snap.rect(leftSide_w + 0.5, 0.5, scr_w - leftSide_w - 1, 40).attr({
         fill: "#d2d2d2",
         strokeWidth: 0.5,
         stroke: "#000"
     });
 
-    var arrow_img = snap.image("/img/arrow.svg", leftSide_w + 10, 5, 30, 30).attr({id: "arrowTool"});
+    let arrow_img = snap.image("/img/arrow.svg", leftSide_w + 10, 5, 30, 30).attr({id: "arrowTool"});
 
-    var connect_img = snap.image("/img/connection.svg", leftSide_w + 60, 5, 30, 30).attr({id: "connectTool"});
-    var save_img = snap.image("/img/save.svg", leftSide_w + 110, 5, 30, 30).attr({id: "saveTool"});
-    var variables_img = snap.image("/img/variables.svg", leftSide_w + 160, 5, 30, 30).attr({id: "variablesTool"});
-    var outputs_img = snap.image("/img/outputs.svg", leftSide_w + 210, 5, 30, 30).attr({id: "outputsTool"});
-    var play_img = snap.image("img/play-button.svg", leftSide_w + 260, 5, 30, 30).attr({id: "playTool"});
+    let connect_img = snap.image("/img/connection.svg", leftSide_w + 60, 5, 30, 30).attr({id: "connectTool"});
+    let save_img = snap.image("/img/save.svg", leftSide_w + 110, 5, 30, 30).attr({id: "saveTool"});
+    let variables_img = snap.image("/img/variables.svg", leftSide_w + 160, 5, 30, 30).attr({id: "variablesTool"});
+    let outputs_img = snap.image("/img/outputs.svg", leftSide_w + 210, 5, 30, 30).attr({id: "outputsTool"});
+    let play_img = snap.image("img/play-button.svg", leftSide_w + 260, 5, 30, 30).attr({id: "playTool"});
 
     arrow_img.click(controller.toolClicked);
     connect_img.click(controller.toolClicked);
@@ -75,37 +75,35 @@ controller.chooseTool(0);
 
 // Левая сторона со списком инструментов
 function createLeftToolsMenu() {
-    var leftSideRect = snap.rect(0, 0, leftSide_w, scr_h).attr({fill: "#d2d2d2"});
-    var menuBlock = snap.rect(toolsPadding / 2, toolsPadding / 2, leftSide_w - toolsPadding, menu_title_block_height).attr({fill: "#696969"});
-    var menuTitle = snap.text(toolsPadding / 2 + 25, toolsPadding / 2 + 30, "Элементы автомата").attr({
+    let leftSideRect = snap.rect(0, 0, leftSide_w, scr_h).attr({fill: "#d2d2d2"});
+    let menuBlock = snap.rect(toolsPadding / 2, toolsPadding / 2, leftSide_w - toolsPadding, menu_title_block_height).attr({fill: "#696969"});
+    let menuTitle = snap.text(toolsPadding / 2 + 25, toolsPadding / 2 + 30, "Элементы автомата").attr({
         fill: "#ffffff",
         pointerEvents: "none"
     });
-    }
+}
 
-    // Элементы автомата
-    function createAutomationElement(_elementBefore) {
-    var cx = leftSide_w/2;
-    var cy = menu_title_block_height+toolsPadding+rectTool_s;
+// Элементы автомата
+function createAutomationElement(_elementBefore) {
+    let cx = leftSide_w/2;
+    let cy = menu_title_block_height+toolsPadding+rectTool_s;
 
-    var graph_node = snap.circle(cx, cy, rectTool_s).attr({
+    let graph_node = snap.circle(cx, cy, rectTool_s).attr({
         fill: '#ffffff',
         stroke: '#000',
         strokeWidth: 2,
         id: 'Graph_1',
     }).addClass("nodeCircle");
-    var node_text = snap.text(cx-4, cy+4, "a").addClass("nodeTitle");
+    let node_text = snap.text(cx-4, cy+4, "a").addClass("nodeTitle");
+    let node_state_text = snap.text(cx+rectTool_s, cy+rectTool_s, "start").attr({visibility: "hidden"}).addClass("nodeStateText");
 
     //console.log('create element ' + DiagramModel.getCountDiagrams() + ': ' + graph_node.id);
 
-    var ngroup = snap.group();
-    ngroup.add(graph_node, node_text);
-    ngroup.attr({class: 'draggable'});
+    let ngroup = snap.group();
+    ngroup.add(graph_node, node_text, node_state_text);
+    ngroup.addClass('draggable');
+    //ngroup.attr({class: 'draggable'});
     ngroup.drag(controller.moveDiagram, controller.startMoveDiagram, controller.stopMoveDiagram);
-    //ngroup.mouseover(controller.mouseoverConn);
-    //ngroup.mouseout(controller.mouseoutConn);
-
-    //graph_node.drag(controller.moveDiagram, controller.startMoveDiagram, controller.stopMoveDiagram);
 
     if(_elementBefore) {
         _elementBefore.insertAfter(ngroup);
@@ -113,21 +111,20 @@ function createLeftToolsMenu() {
 }
 
 function createAutomationElementAtPos(_xPos, _yPos) {
-    var cx = leftSide_w/2;
-    var cy = menu_title_block_height+toolsPadding+rectTool_s;
 
-    var graph_node = snap.circle(_xPos, _yPos, rectTool_s).attr({
+    let graph_node = snap.circle(_xPos, _yPos, rectTool_s).attr({
         fill: '#ffffff',
         stroke: '#000',
         strokeWidth: 2,
         id: 'Graph_1',
     }).addClass("nodeCircle");
-    var node_text = snap.text(_xPos-4, _yPos+4, "a").addClass("nodeTitle");
+    let node_text = snap.text(_xPos-4, _yPos+4, "a").addClass("nodeTitle");
+    let node_state_text = snap.text(_xPos+rectTool_s, _yPos+rectTool_s, "start").attr({visibility: "hidden"}).addClass("nodeStateText");
 
     //console.log('create element ' + DiagramModel.getCountDiagrams() + ': ' + graph_node.id);
 
-    var ngroup = snap.group();
-    ngroup.add(graph_node, node_text);
+    let ngroup = snap.group();
+    ngroup.add(graph_node, node_text, node_state_text);
     ngroup.attr({class: 'draggable'});
     ngroup.drag(controller.moveDiagram, controller.startMoveDiagram, controller.stopMoveDiagram);
 
@@ -142,13 +139,13 @@ function createAutomationElementAtPos(_xPos, _yPos) {
 
 // ------------------=============* Отрисовка графики *=============------------------
 // Сетка
-for (var i = 0; i < horLinesAmount; i++) {
-var y1 = i * cellSize;
-var horLine = snap.line(leftSide_w, y1, scr_w * 2, y1).attr({stroke: "#d2d2d2", strokeWidth: 1});
+for (let i = 0; i < horLinesAmount; i++) {
+    let y1 = i * cellSize;
+    let horLine = snap.line(leftSide_w, y1, scr_w * 2, y1).attr({stroke: "#d2d2d2", strokeWidth: 1});
 }
-for (var i = 0; i < vertLinesAmount; i++) {
-var x1 = i * cellSize + leftSide_w;
-var vertLine = snap.line(x1, 0, x1, scr_h * 2).attr({stroke: "#d2d2d2", strokeWidth: 1});
+for (let i = 0; i < vertLinesAmount; i++) {
+    let x1 = i * cellSize + leftSide_w;
+    let vertLine = snap.line(x1, 0, x1, scr_h * 2).attr({stroke: "#d2d2d2", strokeWidth: 1});
 }
 createToolsMenuBlock();
 createLeftToolsMenu();

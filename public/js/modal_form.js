@@ -1,24 +1,26 @@
 function ModalForm() {
 
-    var diagramId = null;
+    let diagramId = null;
 
     //console.log('title: ' + _data.title + ' content: ' + _data.content);
 
     //console.log('------------> X: ' + elem.matrix.e);
     //console.log('------------> Y: ' + elem.matrix.f);
 
-    var last_modal_type = null;
+    let last_modal_type = null;
 
     this.input_variables_modal = 1;
     this.output_variables_modal = 2;
     this.connection_modal = 3;
     this.save_diagram_modal = 4;
+    this.node_info_modal = 5;
 
-    var conn_index = null;
+    let conn_index = null;
+    let node_index = null;
 
 
     // -------------------- Отобразим модальное окно Содержимое диаграммы --------------------------
-    this.showModalDialog = function (modal_type, _conn_index) {
+    this.showModalDialog = function (modal_type, _conn_index, data) {
         //console.log('title: ' + _data.title + ' content: ' + _data.content);
         //$('#ClassName').val(_data.title);
         //$('#DiagramText').val(_data.content);
@@ -26,10 +28,25 @@ function ModalForm() {
 
         console.log('arguments.length = ' + arguments.length);
 
-        this.create_view(modal_type);
+        if(arguments.length >= 2 && _conn_index !== null) conn_index = _conn_index;
+        else if(arguments.length === 1) conn_index = null;
 
-        if(arguments.length === 2) conn_index = _conn_index;
-        else conn_index = null;
+        if(arguments.length >= 3) {
+            //console.log('data = ' + JSON.stringify(data));
+            //console.log('conn: ' + data.connectsFrom + ' - ' + data.connectsTo);
+            if('connectsFrom' in data && 'connectsTo' in data) {
+                let connection_info_text = DiagramModel.getNodeTitleByIndex(data.connectsFrom) + ' -> ' + DiagramModel.getNodeTitleByIndex(data.connectsTo);
+                console.log('conn: ' + connection_info_text);
+                $('#connection_from_to').append(connection_info_text);
+            }
+            else if('node_index' in data) {
+                node_index = data.node_index;
+                let node_title = DiagramModel.getNodeTitleByIndex(node_index);
+                $('#node_title_text').append(node_title);
+            }
+        }
+
+        this.create_view(modal_type);
 
         event.preventDefault(); // выключaем стaндaртную рoль элементa
         $('#overlay').fadeIn(200, // снaчaлa плaвнo пoкaзывaем темную пoдлoжку
@@ -82,7 +99,7 @@ function ModalForm() {
 
             // --------- Представление для создания соединения
             case this.connection_modal:
-                modal_dynamic_content.innerHTML = 'Создание связи<br>' +
+                modal_dynamic_content.innerHTML = 'Создание связи <div id="connection_from_to" style="display:inline-block;"></div><br>' +
                     'Входные переменные:<br>' +
                     '<div><input type="button" onclick="addVariable(null, true, true)" value="Добавить" style="height:20px; margin-right:10px;"></div>' +
                     '<div id="input_variables_modal_content" style="width:100%;"></div>' +
@@ -134,10 +151,39 @@ function ModalForm() {
                 });
 
                 break;
+            case this.node_info_modal:
+                modal_dynamic_content.innerHTML = '<div style="padding-bottom:10px;">Редактирование вершины \'<div id="node_title_text" style="display:inline-block;"></div>\'</div>' +
+                                                '<div style="margin-bottom:5px; cursor:pointer;" onclick="modal_form.node_state_changed(0)"><input type="checkbox" id="start_node_state" style="width:18px; height:18px; display: inline-block; margin-right:5px; margin-top:3px; cursor:pointer;" onclick="modal_form.node_state_changed(0)">' +
+                                                '<div style="display:inline-block; vertical-align: top;">Начальное состояние</div></div>' +
+                                                '<div style="cursor:pointer;" onclick="modal_form.node_state_changed(1)"><input type="checkbox" id="end_node_state" style="width:18px; height:18px; display: inline-block; margin-right:5px; margin-top:3px; cursor:pointer;" onclick="modal_form.node_state_changed(1)">' +
+                                                '<div style="display:inline-block; vertical-align: top;">Конечное состояние</div></div>';
+                document.getElementById('modal_form').appendChild(modal_dynamic_content);
+
+                if(node_index === DiagramModel.getStartDiagramIndex()) {
+                    document.getElementById('start_node_state').checked = true;
+                }
+                else if(node_index === DiagramModel.getEndDiagramIndex()) {
+                    document.getElementById('end_node_state').checked = true;
+                }
+
+                break;
         }
         last_modal_type = modal_type;
     };
 
+    this.node_state_changed = function(node_state) {
+        console.log('node_state_changed');
+        let start_node = document.getElementById('start_node_state');
+        let end_node = document.getElementById('end_node_state');
+        if(node_state === 0) {
+            start_node.checked = !start_node.checked;
+            end_node.checked = false;
+        }
+        else if(node_state === 1) {
+            end_node.checked = !end_node.checked;
+            start_node.checked = false;
+        }
+    };
 
     // ----------- Сохраняем данные в модель после закрытия модального окна ------------
     function save_model_data() {
@@ -154,6 +200,55 @@ function ModalForm() {
             case modal_form.connection_modal:
                 saveInputsModel();
                 saveOutputsModel();
+                break;
+            case modal_form.node_info_modal:
+                if(node_index !== null) {
+                    let node_state_text = null;
+                    if(document.getElementById('start_node_state').checked) {
+                        let old_start_node_index = DiagramModel.getStartDiagramIndex();
+                        console.log('old_start_node_index = ' + old_start_node_index);
+                        if(old_start_node_index !== -1) {
+                            DiagramModel.getDrawableByIndex(old_start_node_index).select('.nodeStateText').attr({visibility: 'hidden', text: ''});
+                        }
+
+                        DiagramModel.setStartDiagramIndex(node_index);
+                        node_state_text = 'start';
+                    }
+                    else if(document.getElementById('end_node_state').checked) {
+                        let old_end_node_index = DiagramModel.getEndDiagramIndex();
+                        if(old_end_node_index !== -1) {
+                            DiagramModel.getDrawableByIndex(old_end_node_index).select('.nodeStateText').attr({
+                                visibility: 'hidden',
+                                text: ''
+                            });
+                        }
+
+                        DiagramModel.setEndDiagramIndex(node_index);
+                        node_state_text = 'end';
+                    }
+
+                    if(node_state_text !== null) {
+                        DiagramModel.getDrawableByIndex(node_index).select('.nodeStateText').attr({
+                            visibility: 'visible',
+                            text: node_state_text
+                        });
+                    }
+                    else {
+                        let status_empty = false;
+                        if(node_index === DiagramModel.getStartDiagramIndex()) {
+                            DiagramModel.setStartDiagramIndex(-1);
+                            status_empty = true;
+                        }
+                        else if(node_index === DiagramModel.getEndDiagramIndex()) {
+                            DiagramModel.setEndDiagramIndex(-1);
+                            status_empty = true;
+                        }
+                        if(status_empty) DiagramModel.getDrawableByIndex(node_index).select('.nodeStateText').attr({visibility: 'hidden', text: ''});
+                    }
+
+                    console.log('save: start_node: ' + DiagramModel.getStartDiagramIndex() + ' | end_node = ' + DiagramModel.getEndDiagramIndex());
+                }
+                node_index = null;
                 break;
         }
     };
@@ -202,7 +297,6 @@ function ModalForm() {
             }
         }
 
-
         let output_variables = DiagramModel.getOutputVariables();
 
         let output_count = 0;
@@ -217,6 +311,7 @@ function ModalForm() {
         }
 
         controller.setConnectionVariables(conn_index, conn_input_vars, conn_output_vars);
+        conn_index = null;
     }
 
 

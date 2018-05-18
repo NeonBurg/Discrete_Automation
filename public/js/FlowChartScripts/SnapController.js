@@ -34,11 +34,9 @@ function Controller() {
             transform: this.data('origTransform') + (this.data('origTransform') ? "T" : "t") + [dx, dy]
         });
 
-        if(firstTouch === true) dxToolMoved = dx;
+        //console.log('moveDiagram');
 
-        /*for (var i = connections.length; i--;) {
-            snap.create_connection(connections[i]);
-        }*/
+        dxToolMoved = dx;
 
         for (let i = DiagramModel.getConnectsCount(); i--;) {
             snap.create_connection(DiagramModel.getConnectByIndex(i));
@@ -48,7 +46,7 @@ function Controller() {
         //console.log('moving: x = ' + x + " y = " + y);
     };
 
-    // Начало перемещения диаграммы
+    // ------------------ Начало перемещения диаграммы ------------------
     this.startMoveDiagram = function(x, y) {
         this.data('origTransform', this.transform().local );
 
@@ -76,10 +74,21 @@ function Controller() {
                 //var names = ['A', 'B', 'C'];
                 sendData.title = 'a'+DiagramModel.getCountDiagrams();
                 AddDiagram(this, sendData);
-
             }
             firstTouch = false;
+            dxToolMoved = 0;
         }
+    };
+
+    this.diagramClicked = function() {
+        //console.log('dxToolMoved = ' + dxToolMoved);
+        if(dxToolMoved === 0) {
+            //console.log('diagram ' + this.id + ' clicked');
+            let node_data = {node_index : DiagramModel.getIndexByDiagramId(this.id)};
+            modal_form.showModalDialog(modal_form.node_info_modal, null, node_data);
+        }
+
+        dxToolMoved = 0;
     };
 
     // ------------------ Выбор инструмента ------------------------
@@ -286,7 +295,7 @@ function Controller() {
     // -----------------------------------------------------------------
 
 
-    // ------------------- Перемещение соединений ----------------------
+    // ------------------============= Перемещение соединений ==============----------------
     this.mouseoverConn = function() {
         if(connect_mode) {
             this.select('.nodeCircle').attr({stroke: "#fff600"});
@@ -344,7 +353,9 @@ function Controller() {
 
                 connectNodes(node_from, node_to);
 
-                modal_form.showModalDialog(modal_form.connection_modal, DiagramModel.getConnectsCount()-1);
+                let conn_data = {connectsFrom: node_from, connectsTo: node_to};
+
+                modal_form.showModalDialog(modal_form.connection_modal, DiagramModel.getConnectsCount()-1, conn_data);
 
             }
         }
@@ -413,7 +424,9 @@ function Controller() {
                 let project_data = {graphData: JSON.stringify(graph_data_save),
                                     inputVariables: JSON.stringify(input_variables_save),
                                     outputVariables: JSON.stringify(output_variables_save),
-                                    connectionsData: JSON.stringify(connections_data_save)};
+                                    connectionsData: JSON.stringify(connections_data_save),
+                                    startNodeIndex: DiagramModel.getStartDiagramIndex(),
+                                    endNodeIndex: DiagramModel.getEndDiagramIndex()};
 
                 $.post("/saveProject", {pName: project_name, pData: JSON.stringify(project_data)}, onFileWriteSuccess);
             }
@@ -439,11 +452,15 @@ function Controller() {
                 let input_variables_load = JSON.parse(project_data.inputVariables);
                 let output_variables_load = JSON.parse(project_data.outputVariables);
                 let connections_data_load = JSON.parse(project_data.connectionsData);
+                let start_node_index = JSON.parse(project_data.startNodeIndex);
+                let end_node_index = JSON.parse(project_data.endNodeIndex);
 
                 console.log(connections_data_load);
 
                 DiagramModel.setInputVariablesList(input_variables_load);
                 DiagramModel.setOutputVariablesList(output_variables_load);
+                DiagramModel.setStartDiagramIndex(start_node_index);
+                DiagramModel.setEndDiagramIndex(end_node_index);
 
 
                 for(let key in graph_data_load) {
@@ -452,7 +469,7 @@ function Controller() {
                     let yPos = graph_data_load[key].position[1];
 
                     let diagramDrawable = createAutomationElementAtPos(xPos, yPos);
-                    AddDiagram(diagramDrawable, graph_data_load[key]);
+                    LoadDiagram(diagramDrawable, graph_data_load[key]);
                 }
 
 
@@ -469,6 +486,7 @@ function Controller() {
                     controller.setConnectionVariables(conn_index, inputVars, outputVars);
                 }
 
+                loadStartEndStates();
             }
             else {
                 $('#err_msg_load').text("Ошибка загрузки проекта");
@@ -476,6 +494,23 @@ function Controller() {
 
         });
     };
+
+    // Выделим начальное и конечное состояния после загрузки проекта
+    function loadStartEndStates() {
+
+        console.log('loadStartEndStates: start_index = ' + DiagramModel.getStartDiagramIndex() + ' | end_index = ' + DiagramModel.getEndDiagramIndex());
+
+        console.log('----------------------');
+        console.log(JSON.stringify(DiagramModel.getDrawableByIndex(DiagramModel.getStartDiagramIndex())));
+
+        if(DiagramModel.getStartDiagramIndex() !== -1) {
+            DiagramModel.getDrawableByIndex(DiagramModel.getStartDiagramIndex()).select('.nodeStateText').attr({visibility: 'visible', text: 'start'});
+        }
+
+        if(DiagramModel.getEndDiagramIndex() !== -1) {
+            DiagramModel.getDrawableByIndex(DiagramModel.getEndDiagramIndex()).select('.nodeStateText').attr({visibility: 'visible', text: 'end'});
+        }
+    }
 
 
     function onFileWriteSuccess(response) {
@@ -674,7 +709,27 @@ var AddDiagram = function(_drawable, _data) {
     //console.log('AddDiagram: ');
     //console.log('_data: ' + _data);
     var cx = _drawable.select('.nodeTitle').attr("x");
-    _drawable.select('.nodeTitle').attr({x: cx-4, text: _data.title});
+    _drawable.select('.nodeTitle').attr({x: cx - 4, text: _data.title});
+
+    if(DiagramModel.getCountDiagrams() === 0) {
+        _drawable.select('.nodeStateText').attr({visibility : "visible"});
+        DiagramModel.setStartDiagramIndex(0);
+    }
+
+    _drawable.click(controller.diagramClicked);
+
+    if(DiagramModel.getCountDiagrams() === 0) zero_state_node = _drawable;
+
+    DiagramModel.addData(_drawable, _data);
+};
+
+var LoadDiagram = function(_drawable, _data) {
+    //console.log('AddDiagram: ');
+    //console.log('_data: ' + _data);
+    var cx = _drawable.select('.nodeTitle').attr("x");
+    _drawable.select('.nodeTitle').attr({x: cx - 4, text: _data.title});
+
+    _drawable.click(controller.diagramClicked);
 
     if(DiagramModel.getCountDiagrams() === 0) zero_state_node = _drawable;
 
