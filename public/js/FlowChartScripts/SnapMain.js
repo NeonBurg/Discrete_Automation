@@ -2,6 +2,7 @@
 
 var snap = Snap();
 var controller = new Controller();
+var graphVisualizer = new GraphVisualizer();
 
 // ------------- Размеры -------------
 var scr_w = document.body.clientWidth;

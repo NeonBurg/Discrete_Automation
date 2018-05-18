@@ -42,8 +42,6 @@ function ModalForm() {
             }
             else if('node_index' in data) {
                 node_index = data.node_index;
-                let node_title = DiagramModel.getNodeTitleByIndex(node_index);
-                $('#node_title_text').append(node_title);
             }
         }
 
@@ -180,6 +178,11 @@ function ModalForm() {
                                                 '<div style="cursor:pointer;" onclick="modal_form.node_state_changed(1)"><input type="checkbox" id="end_node_state" style="width:18px; height:18px; display: inline-block; margin-right:5px; margin-top:3px; cursor:pointer;" onclick="modal_form.node_state_changed(1)">' +
                                                 '<div style="display:inline-block; vertical-align: top;">Конечное состояние</div></div>';
                 document.getElementById('modal_form').appendChild(modal_dynamic_content);
+
+                if(node_index !== null) {
+                    let node_title = DiagramModel.getNodeTitleByIndex(node_index);
+                    $('#node_title_text').append(node_title);
+                }
 
                 if(node_index === DiagramModel.getStartDiagramIndex()) {
                     document.getElementById('start_node_state').checked = true;

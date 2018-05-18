@@ -80,15 +80,29 @@ function Controller() {
         }
     };
 
+
+    // ----------------- Клик по вершине графа --------------------
     this.diagramClicked = function() {
         //console.log('dxToolMoved = ' + dxToolMoved);
         if(dxToolMoved === 0) {
-            //console.log('diagram ' + this.id + ' clicked');
-            let node_data = {node_index : DiagramModel.getIndexByDiagramId(this.id)};
+            let node_index = DiagramModel.getIndexByDiagramId(this.id);
+            console.log('diagram ' + node_index + ' clicked');
+            let node_data = {node_index : node_index};
             modal_form.showModalDialog(modal_form.node_info_modal, null, node_data);
         }
 
         dxToolMoved = 0;
+    };
+
+    // Для теста визуализатора
+    this.diagramHovered = function() {
+        console.log('diagramHovered');
+        let node_index = DiagramModel.getIndexByDiagramId(this.id);
+        graphVisualizer.hoverNode(node_index);
+    };
+
+    this.diagramUnHovered = function() {
+        graphVisualizer.clearHoverNode();
     };
 
     // ------------------ Выбор инструмента ------------------------
@@ -604,6 +618,7 @@ function Controller() {
             discreteAuto.start();
             terminal.sendToTerminal('Дискретный автомат был успешно запущен', terminal.SUCCESS_MSG_TYPE);
             terminal.sendToTerminal('Введите входное значение:');
+            graphVisualizer.hoverNode(discreteAuto.getCurrentState());
         }
         else {
             discreteAuto = null;
@@ -624,6 +639,7 @@ function Controller() {
             playTool.hover(controller.toolHovered, controller.toolUnHovered);
 
             discreteAuto.stop();
+            graphVisualizer.clearHoverNode();
         }
     }
 
@@ -633,6 +649,16 @@ function Controller() {
             if(discreteAuto.sendInput(_command)) {
                 terminal.sendToTerminal('currState: ' + discreteAuto.getCurrentState() + ' | currOutputKey: ' + discreteAuto.getCurrentOutputKey());
                 terminal.sendToTerminal('out: ' + discreteAuto.getCurrentOutputValue());
+                graphVisualizer.clearHoverNode();
+                graphVisualizer.hoverNode(discreteAuto.getCurrentState());
+
+                //console.log('end state = ' + DiagramModel.getEndDiagramIndex());
+
+                if(discreteAuto.getCurrentState() === DiagramModel.getEndDiagramIndex()) {
+                    terminal.sendToTerminal('Discrete automate is END at the state: ' + DiagramModel.getNodeTitleByIndex(discreteAuto.getCurrentState()), terminal.SUCCESS_MSG_TYPE);
+                    stopDiscreteAuto();
+                }
+
             }
             else {
                 let err_msg_list = discreteAuto.getErrorMsgs();
@@ -744,6 +770,9 @@ var AddDiagram = function(_drawable, _data) {
     }
 
     _drawable.click(controller.diagramClicked);
+
+    // Тестим визуализатор графа
+    //_drawable.hover(controller.diagramHovered, controller.diagramUnHovered);
 
     if(DiagramModel.getCountDiagrams() === 0) zero_state_node = _drawable;
 
