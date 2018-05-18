@@ -1,6 +1,6 @@
 // SnapMain.js
 
-var snap = Snap();
+var snap = Snap("#editor");
 var controller = new Controller();
 var graphVisualizer = new GraphVisualizer();
 
