@@ -17,6 +17,7 @@ function ModalForm() {
 
     let conn_index = null;
     let node_index = null;
+    let connection_info_text = null;
 
 
     // -------------------- Отобразим модальное окно Содержимое диаграммы --------------------------
@@ -35,9 +36,9 @@ function ModalForm() {
             //console.log('data = ' + JSON.stringify(data));
             //console.log('conn: ' + data.connectsFrom + ' - ' + data.connectsTo);
             if('connectsFrom' in data && 'connectsTo' in data) {
-                let connection_info_text = DiagramModel.getNodeTitleByIndex(data.connectsFrom) + ' -> ' + DiagramModel.getNodeTitleByIndex(data.connectsTo);
+                connection_info_text = DiagramModel.getNodeTitleByIndex(data.connectsFrom) + ' -> ' + DiagramModel.getNodeTitleByIndex(data.connectsTo);
                 console.log('conn: ' + connection_info_text);
-                $('#connection_from_to').append(connection_info_text);
+                //$('#connection_from_to').append(connection_info_text);
             }
             else if('node_index' in data) {
                 node_index = data.node_index;
@@ -109,6 +110,11 @@ function ModalForm() {
 
                 document.getElementById('modal_form').appendChild(modal_dynamic_content);
 
+                if(connection_info_text !== null) {
+                    console.log('connection_info_text = ' + connection_info_text);
+                    $('#connection_from_to').append(connection_info_text);
+                }
+
                 var input_variables = DiagramModel.getInputVariables();
                 for(var key_name in input_variables) {
                     addVariable(key_name, true, true);
@@ -118,6 +124,22 @@ function ModalForm() {
                 for(var key_name in output_variables) {
                     addVariable(key_name, false, true);
                 }
+
+                if(conn_index !== null) {
+                    let conn_input_vars = DiagramModel.getConnectInputVariables(conn_index);
+                    for(key in conn_input_vars) {
+                        //console.log('key = ' + conn_input_vars[key]);
+                        document.getElementById('inputCheckBoxId_'+conn_input_vars[key]).checked = true;
+                    }
+
+                    let conn_output_vars = DiagramModel.getConnectOutputVariables(conn_index);
+                    for(key in conn_output_vars) {
+                        //console.log('key = ' + conn_output_vars[key]);
+                        document.getElementById('outputCheckBoxId_'+conn_output_vars[key]).checked = true;
+                    }
+                }
+
+
                 break;
             case this.save_diagram_modal:
                 modal_dynamic_content.innerHTML = '<div style="margin-right:5px; display:block;">' +
@@ -331,6 +353,7 @@ function ModalForm() {
         //console.log('modal_form.conn_index = ' + conn_index);
 
         remove_view();
+        connection_info_text = null;
 
         $('#modal_form')
             .animate({opacity: 0, top: '45%'}, 200,  // плaвнo меняем прoзрaчнoсть нa 0 и oднoвременнo двигaем oкнo вверх

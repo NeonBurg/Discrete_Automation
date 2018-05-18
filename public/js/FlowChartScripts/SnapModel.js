@@ -125,6 +125,24 @@ var DiagramModel = {
         return connects_data;
     },
 
+    getConnectInputVariables: function(conn_index) {
+        return this.connects[conn_index].inputVariables;
+    },
+
+    getConnectOutputVariables: function(conn_index) {
+        return this.connects[conn_index].outputVariables;
+    },
+
+    getConnectIndexById: function(connect_line_drawable_id) {
+        let conn_index = null;
+        for(let key in this.connects) {
+            if(this.connects[key].connection.line.id === connect_line_drawable_id) {
+                conn_index = key;
+            }
+        }
+        return conn_index;
+    },
+
     getConnectByIndex: function(_index) {
         return this.connects[_index].connection;
     },

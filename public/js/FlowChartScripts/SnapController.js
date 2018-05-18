@@ -312,6 +312,31 @@ function Controller() {
         }
     };
 
+    this.connectionHover = function() {
+        //console.log('connection hover');
+        //console.log(JSON.stringify(this));
+        //console.log('line_obj id: ' + this.select('.line_object').id);
+        //console.log('hover conn: ' + DiagramModel.getConnectIndexById(this.select('.line_object').id));
+        this.select('.line_hover_object').attr({opacity: 1});
+        this.select('.line_hover_object').insertBefore(this.select('.line_object'));
+    };
+
+    this.connectionUnhover = function() {
+        //console.log('connection unhover');
+        this.select('.line_hover_object').attr({opacity: 0});
+    };
+
+    this.connectionClicked = function() {
+        let conn_index = DiagramModel.getConnectIndexById(this.select('.line_object').id);
+        //console.log('click on conn: ' + conn_index);
+        let conn_data = DiagramModel.getConnectDataByIndex(conn_index);
+        let node_from = conn_data.fromDrawableIndex;
+        let node_to = conn_data.toDrawableIndex;
+        //console.log('from: ' + node_from + ' | to: ' + node_to);
+        let send_conn_data = {connectsFrom: node_from, connectsTo: node_to};
+        modal_form.showModalDialog(modal_form.connection_modal, conn_index, send_conn_data);
+    },
+
     // ------------- Движение -------------
     this.movingConn = function(dx,dy, x, y) {
         tempCircle.attr({
@@ -392,6 +417,8 @@ function Controller() {
 
         DiagramModel.addConnect(drawable_from.id, drawable_to.id, connection);
     }
+
+    // --------------------------------------------------------------------------------------------------
 
     // ----------------- Сохраняем/Загружаем проект --------------------
     this.save_project_clicked = function() {

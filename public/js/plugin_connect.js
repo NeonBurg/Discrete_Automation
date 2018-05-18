@@ -141,14 +141,29 @@ Snap.plugin(function (Snap, Element, Paper, global) {
 
         if (line && line.line) {
             line.line.attr({path: path});
+            line.line_hover_object.attr({path: path});
+            //line.line_hover_group.select('.line_hover_object').attr({path: path});
             arrow_line1.attr({path: path_arrow1}).attr({stroke:'#000', strokeWidth:1});
             arrow_line2.attr({path: path_arrow2}).attr({stroke:'#000', strokeWidth:1});
             line.text_element.attr({x: textCoords.x, y: textCoords.y});
             //circle.attr({path:snap.circlePath(new_x, new_y, 10)});
         } else {
-            var line_draw = (this.path(path).attr({stroke: "#000", fill: "none"})).insertBefore(zero_state_node);
+            var line_draw = (this.path(path).attr({stroke: "#000", fill: "none"})).insertBefore(zero_state_node).addClass('line_object');
+
+            let line_hover_object = (this.path(path).attr({stroke: "#a9a9a9", strokeWidth:15, fill: "none", opacity:0})).addClass('line_hover_object');
+            line_hover_object.insertBefore(zero_state_node).insertBefore(line_draw);
+
+            let ngroup = snap.group();
+            ngroup.add(line_draw, line_hover_object);
+            ngroup.addClass('connectable');
+            ngroup.hover(controller.connectionHover, controller.connectionUnhover);
+            ngroup.insertBefore(zero_state_node);
+            ngroup.click(controller.connectionClicked);
+
             return {
                 line: line_draw,
+                line_hover_object: line_hover_object,
+                //line_hover_group: ngroup,
                 from: obj1,
                 to: obj2,
                 arrow_line1: this.path(path_arrow1).attr({stroke:'#000', strokeWidth:1}),
@@ -156,13 +171,9 @@ Snap.plugin(function (Snap, Element, Paper, global) {
                 align: 1,
                 text_element: snap.text(textCoords.x, textCoords.y),
                 text: ''
-                //text_element: snap.text(textCoords.x, textCoords.y, variables_text),
-                //text: variables_text
-                //circle: this.circle(new_x, new_y, 10).attr({fill:'#ffffff', stroke:'#000', strokeWidth:1})
-                //circle: this.path(snap.circlePath(new_x, new_y, 10)).attr({fill:'#ffffff', stroke:'#000', strokeWidth:1})
             };
         }
-    }
+    };
 
 
 
@@ -222,6 +233,7 @@ Snap.plugin(function (Snap, Element, Paper, global) {
         conn_to.arrow_line2.attr({path: path_arrow2}).attr({stroke:'#000', strokeWidth:1});
         conn_to.align = 3;
         conn_to.text_element.attr({x: textCoords.x, y: textCoords.y});
+        conn_to.line_hover_object.attr({path: path});
         //conn_to.text_element.attr({x: textCoords.x, y: textCoords.y, text:'x4, x5'});
         //conn_to.text = 'x4, x5';
 
