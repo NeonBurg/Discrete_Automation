@@ -47,6 +47,7 @@ function createToolsMenuBlock() {
     let variables_img = snap.image("/img/variables.svg", leftSide_w + 160, 5, 30, 30).attr({id: "variablesTool"});
     let outputs_img = snap.image("/img/outputs.svg", leftSide_w + 210, 5, 30, 30).attr({id: "outputsTool"});
     let play_img = snap.image("img/play-button.svg", leftSide_w + 260, 5, 30, 30).attr({id: "playTool"});
+    let enter_data_img = snap.image("img/entering-data.svg", leftSide_w + 310, 5, 30, 30).attr({id: "enterDataTool"});
 
     arrow_img.click(controller.toolClicked);
     connect_img.click(controller.toolClicked);
@@ -54,6 +55,7 @@ function createToolsMenuBlock() {
     variables_img.click(controller.toolClicked);
     outputs_img.click(controller.toolClicked);
     play_img.click(controller.toolClicked);
+    enter_data_img.click(controller.toolClicked);
 
     arrow_img.hover(controller.toolHovered, controller.toolUnHovered);
     connect_img.hover(controller.toolHovered, controller.toolUnHovered);
@@ -61,6 +63,7 @@ function createToolsMenuBlock() {
     variables_img.hover(controller.toolHovered, controller.toolUnHovered);
     outputs_img.hover(controller.toolHovered, controller.toolUnHovered);
     play_img.hover(controller.toolHovered, controller.toolUnHovered);
+    enter_data_img.hover(controller.toolHovered, controller.toolUnHovered);
 
 
 

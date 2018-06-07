@@ -27,6 +27,7 @@ function Controller() {
     this.INPUT_VARS_TOOL = 3;
     this.OUTPUT_VARS_TOOL = 4;
     this.PLAY_TOOL = 5;
+    this.ENTER_DATA_TOOL = 6;
 
     // ------------------ Перемещение диаграммы ------------------
     this.moveDiagram = function(dx,dy, x, y) {
@@ -139,6 +140,9 @@ function Controller() {
             case snap.select('#playTool').id:
                 selectTool(controller.getToolType('playTool'));
                 break;
+            case snap.select('#enterDataTool').id:
+                selectTool(controller.getToolType('enterDataTool'));
+                break;
         }
     };
 
@@ -174,6 +178,10 @@ function Controller() {
                 case controller.PLAY_TOOL:
                     onPlayToolSelected();
                     toolDrawable = snap.select('#playTool');
+                    break;
+                case controller.ENTER_DATA_TOOL:
+                    onEnterDataSelected();
+                    toolDrawable = snap.select('#enterDataTool');
                     break;
             }
 
@@ -217,6 +225,9 @@ function Controller() {
                 break;
             case snap.select('#playTool').id:
                 tool_drawable_id = 'playTool';
+                break;
+            case snap.select('#enterDataTool').id:
+                tool_drawable_id = 'enterDataTool';
                 break;
         }
 
@@ -271,6 +282,10 @@ function Controller() {
 
     function onPlayToolSelected() {
         startDiscreteAuto();
+    }
+
+    function onEnterDataSelected() {
+
     }
 
     this.chooseTool = function (index) {
@@ -760,6 +775,8 @@ function Controller() {
                 return this.OUTPUT_VARS_TOOL;
             case 'playTool':
                 return this.PLAY_TOOL;
+            case 'enterDataTool':
+                return this.ENTER_DATA_TOOL;
             default:
                 return -1;
         }
