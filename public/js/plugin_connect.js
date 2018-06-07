@@ -70,7 +70,16 @@ Snap.plugin(function (Snap, Element, Paper, global) {
 
         var align=1;
 
-        if (obj1.line && obj1.from && obj1.to) {
+        //console.log('create conn obj2 = ' + obj2);
+
+        if(obj1.line && obj1.from && !obj1.to) {
+                console.log('enter if');
+                line = obj1;
+                obj1 = line.from;
+                arrow_line1 = line.arrow_line1;
+                arrow_line2 = line.arrow_line2;
+        }
+        else if (obj1.line && obj1.from && obj1.to) {
             line = obj1;
             lines = line;
             align = line.align;
@@ -81,97 +90,182 @@ Snap.plugin(function (Snap, Element, Paper, global) {
             //circle = line.circle
         }
 
-        var bb1 = obj1.getTransformedBBox(),
-            bb2 = obj2.getTransformedBBox(),
-            bb3 = obj1.getBBox();
+        if(line && line.self_connect && line.self_connect === true || obj1 === obj2) {
 
-        /*var x1 = bb1.cx - (bb1.cx - bb3.cx),
-            y1 = bb1.cy - (bb1.cy - bb3.cy),
-            x4 = bb3.cx - (bb1.cx - bb2.cx),
-            y4 = bb3.cy - (bb1.cy - bb2.cy);*/
+            /*if (obj1.line && obj1.from) {
+                line = obj1;
+                obj1 = line.from;
+                arrow_line1 = line.arrow_line1;
+                arrow_line2 = line.arrow_line2;
+            }*/
 
-        var x1 = bb1.cx,
-            y1 = bb1.cy,
-            x4 = bb2.cx,
-            y4 = bb2.cy;
+            let obj_bb1 = obj1.getTransformedBBox();
 
-        //console.log('line.align = ' + align);
+            let x1 = obj_bb1.cx,
+                y1 = obj_bb1.cy;
 
-        var full_length = vectorLength(x1,y1,x4,y4);
-        var radius = 30;
-        var radius2 = 45;
+            x1 = x1 + 20;
+            y1 = y1 + 7;
 
-        if(align === 3) {
-            var rotate_v1 = rotateV2AroundPoint(x1, y1, 90, x4, y4);
-            var rotate_v2 = rotateV2AroundPoint(x4, y4, -90, x1, y1);
+            // ------------ Создаем кривую --------------
+            let path = "M" + [x1-40, y1, x1-40, y1-50].join() + "Q" + [x1-40, y1-80, x1-20, y1-80].join() + "Q" + [x1, y1-80, x1, y1-50] + "M" + [x1, y1-50, x1, y1];
 
-            var nx1 = x1 + (rotate_v2.x-x1) * ((radius/2)/full_length);
-            var ny1 = y1 + (rotate_v2.y-y1) * ((radius/2)/full_length);
-            var nx2 = x4 + (rotate_v1.x-x4) * ((radius/2)/full_length);
-            var ny2 = y4 + (rotate_v1.y-y4) * ((radius/2)/full_length);
+            // ------ Находим координаты для стрелок --------
 
-            x1=nx1;
-            y1=ny1;
-            x4=nx2;
-            y4=ny2;
+            let new_x = parseFloat(x1);
+            let new_y = parseFloat(y1-30);
+            let new_x2 = parseFloat(x1);
+            let new_y2 = parseFloat(y1-45);
 
-            radius -= 4;
-            radius2 -= 4;
+            let rotated_point1 = rotateV2AroundPoint(new_x2, new_y2, 20, new_x, new_y);
+            let rotated_point2 = rotateV2AroundPoint(new_x2, new_y2, -20, new_x, new_y);
+
+            let path_arrow1 = "M" + [rotated_point1.x, rotated_point1.y, new_x, new_y].join();
+            let path_arrow2 = "M" + [rotated_point2.x, rotated_point2.y, new_x, new_y].join();
+
+            // -------- Координаты для текста --------
+            let textCoords = {x: x1-40, y: y1-87};
+
+            if (line && line.line) {
+                line.line.attr({path: path});
+                line.line_hover_object.attr({path: path});
+                arrow_line1.attr({path: path_arrow1}).attr({stroke:'#000', strokeWidth:1});
+                arrow_line2.attr({path: path_arrow2}).attr({stroke:'#000', strokeWidth:1});
+                line.text_element.attr({x: textCoords.x, y: textCoords.y});
+            }
+            else {
+                let line_draw = (this.path(path).attr({stroke: "#000", fill: "none"})).insertBefore(zero_state_node).addClass('line_object');
+
+                let line_hover_object = (this.path(path).attr({
+                    stroke: "#a9a9a9",
+                    strokeWidth: 15,
+                    fill: "none",
+                    opacity: 0
+                })).addClass('line_hover_object');
+                line_hover_object.insertBefore(zero_state_node).insertBefore(line_draw);
+
+                let ngroup = snap.group();
+                ngroup.add(line_draw, line_hover_object);
+                ngroup.addClass('connectable');
+                ngroup.hover(controller.connectionHover, controller.connectionUnhover);
+                ngroup.insertBefore(zero_state_node);
+                ngroup.click(controller.connectionClicked);
+
+                return {
+                    line: line_draw,
+                    line_hover_object: line_hover_object,
+                    from: obj1,
+                    arrow_line1: this.path(path_arrow1).attr({stroke:'#000', strokeWidth:1}),
+                    arrow_line2: this.path(path_arrow2).attr({stroke:'#000', strokeWidth:1}),
+                    text_element: snap.text(textCoords.x, textCoords.y),
+                    text: '',
+                    self_connect: true
+                };
+            }
         }
+        else {
 
-        // Находим координаты для стрелок
-        var new_x = x4 + (x1-x4) * (radius/full_length);
-        var new_y = y4 + (y1-y4) * (radius/full_length);
-        var new_x2 = x4 + (x1-x4) * (radius2/full_length);
-        var new_y2 = y4 + (y1-y4) * (radius2/full_length);
+            var bb1 = obj1.getTransformedBBox(),
+                bb2 = obj2.getTransformedBBox(),
+                bb3 = obj1.getBBox();
 
-        var rotated_point1 = rotateV2AroundPoint(new_x2, new_y2, 20, new_x, new_y);
-        var rotated_point2 = rotateV2AroundPoint(new_x2, new_y2, -20, new_x, new_y);
+            /*var x1 = bb1.cx - (bb1.cx - bb3.cx),
+                y1 = bb1.cy - (bb1.cy - bb3.cy),
+                x4 = bb3.cx - (bb1.cx - bb2.cx),
+                y4 = bb3.cy - (bb1.cy - bb2.cy);*/
 
-        // Находим координаты для текста
-        var textCoords = getTextCoords(x1, y1, x4, y4, full_length, align);
+            var x1 = bb1.cx,
+                y1 = bb1.cy,
+                x4 = bb2.cx,
+                y4 = bb2.cy;
 
-        var path = "M" + x1.toFixed(3) + "," + y1.toFixed(3) + "," + x4.toFixed(3) + "," + y4.toFixed(3);
+            //console.log('line.align = ' + align);
 
-        var path_arrow1 = "M" + rotated_point1.x + "," + rotated_point1.y + "," + new_x + "," + new_y;
-        var path_arrow2 = "M" + rotated_point2.x + "," + rotated_point2.y + "," + new_x + "," + new_y;
+            var full_length = vectorLength(x1, y1, x4, y4);
+            var radius = 30;
+            var radius2 = 45;
 
-        var variables_text = 'x1, x2, x3';
-        if(align === 3) variables_text = 'x4, x5';
+            if (align === 3) {
+                var rotate_v1 = rotateV2AroundPoint(x1, y1, 90, x4, y4);
+                var rotate_v2 = rotateV2AroundPoint(x4, y4, -90, x1, y1);
 
-        if (line && line.line) {
-            line.line.attr({path: path});
-            line.line_hover_object.attr({path: path});
-            //line.line_hover_group.select('.line_hover_object').attr({path: path});
-            arrow_line1.attr({path: path_arrow1}).attr({stroke:'#000', strokeWidth:1});
-            arrow_line2.attr({path: path_arrow2}).attr({stroke:'#000', strokeWidth:1});
-            line.text_element.attr({x: textCoords.x, y: textCoords.y});
-            //circle.attr({path:snap.circlePath(new_x, new_y, 10)});
-        } else {
-            var line_draw = (this.path(path).attr({stroke: "#000", fill: "none"})).insertBefore(zero_state_node).addClass('line_object');
+                var nx1 = x1 + (rotate_v2.x - x1) * ((radius / 2) / full_length);
+                var ny1 = y1 + (rotate_v2.y - y1) * ((radius / 2) / full_length);
+                var nx2 = x4 + (rotate_v1.x - x4) * ((radius / 2) / full_length);
+                var ny2 = y4 + (rotate_v1.y - y4) * ((radius / 2) / full_length);
 
-            let line_hover_object = (this.path(path).attr({stroke: "#a9a9a9", strokeWidth:15, fill: "none", opacity:0})).addClass('line_hover_object');
-            line_hover_object.insertBefore(zero_state_node).insertBefore(line_draw);
+                x1 = nx1;
+                y1 = ny1;
+                x4 = nx2;
+                y4 = ny2;
 
-            let ngroup = snap.group();
-            ngroup.add(line_draw, line_hover_object);
-            ngroup.addClass('connectable');
-            ngroup.hover(controller.connectionHover, controller.connectionUnhover);
-            ngroup.insertBefore(zero_state_node);
-            ngroup.click(controller.connectionClicked);
+                radius -= 4;
+                radius2 -= 4;
+            }
 
-            return {
-                line: line_draw,
-                line_hover_object: line_hover_object,
-                //line_hover_group: ngroup,
-                from: obj1,
-                to: obj2,
-                arrow_line1: this.path(path_arrow1).attr({stroke:'#000', strokeWidth:1}),
-                arrow_line2: this.path(path_arrow2).attr({stroke:'#000', strokeWidth:1}),
-                align: 1,
-                text_element: snap.text(textCoords.x, textCoords.y),
-                text: ''
-            };
+            // Находим координаты для стрелок
+            var new_x = x4 + (x1 - x4) * (radius / full_length);
+            var new_y = y4 + (y1 - y4) * (radius / full_length);
+            var new_x2 = x4 + (x1 - x4) * (radius2 / full_length);
+            var new_y2 = y4 + (y1 - y4) * (radius2 / full_length);
+
+            var rotated_point1 = rotateV2AroundPoint(new_x2, new_y2, 20, new_x, new_y);
+            var rotated_point2 = rotateV2AroundPoint(new_x2, new_y2, -20, new_x, new_y);
+
+            // Находим координаты для текста
+            var textCoords = getTextCoords(x1, y1, x4, y4, full_length, align);
+
+            var path = "M" + x1.toFixed(3) + "," + y1.toFixed(3) + "," + x4.toFixed(3) + "," + y4.toFixed(3);
+
+            var path_arrow1 = "M" + rotated_point1.x + "," + rotated_point1.y + "," + new_x + "," + new_y;
+            var path_arrow2 = "M" + rotated_point2.x + "," + rotated_point2.y + "," + new_x + "," + new_y;
+
+            var variables_text = 'x1, x2, x3';
+            if (align === 3) variables_text = 'x4, x5';
+
+            if (line && line.line) {
+                line.line.attr({path: path});
+                line.line_hover_object.attr({path: path});
+                //line.line_hover_group.select('.line_hover_object').attr({path: path});
+                arrow_line1.attr({path: path_arrow1}).attr({stroke: '#000', strokeWidth: 1});
+                arrow_line2.attr({path: path_arrow2}).attr({stroke: '#000', strokeWidth: 1});
+                line.text_element.attr({x: textCoords.x, y: textCoords.y});
+                //circle.attr({path:snap.circlePath(new_x, new_y, 10)});
+            } else {
+                var line_draw = (this.path(path).attr({
+                    stroke: "#000",
+                    fill: "none"
+                })).insertBefore(zero_state_node).addClass('line_object');
+
+                let line_hover_object = (this.path(path).attr({
+                    stroke: "#a9a9a9",
+                    strokeWidth: 15,
+                    fill: "none",
+                    opacity: 0
+                })).addClass('line_hover_object');
+                line_hover_object.insertBefore(zero_state_node).insertBefore(line_draw);
+
+                let ngroup = snap.group();
+                ngroup.add(line_draw, line_hover_object);
+                ngroup.addClass('connectable');
+                ngroup.hover(controller.connectionHover, controller.connectionUnhover);
+                ngroup.insertBefore(zero_state_node);
+                ngroup.click(controller.connectionClicked);
+
+                return {
+                    line: line_draw,
+                    line_hover_object: line_hover_object,
+                    //line_hover_group: ngroup,
+                    from: obj1,
+                    to: obj2,
+                    arrow_line1: this.path(path_arrow1).attr({stroke: '#000', strokeWidth: 1}),
+                    arrow_line2: this.path(path_arrow2).attr({stroke: '#000', strokeWidth: 1}),
+                    align: 1,
+                    text_element: snap.text(textCoords.x, textCoords.y),
+                    text: '',
+                    self_connect: false
+                };
+            }
         }
     };
 
@@ -256,6 +350,61 @@ Snap.plugin(function (Snap, Element, Paper, global) {
         return {x: new_line_cx, y: new_line_cy};
     }
 
+    // ----------------------- Создаем замкнутую связь ---------------------------
+    Paper.prototype.create_self_connection = function (obj1, line, bg) {
+
+        if (obj1.line && obj1.from) {
+            line = obj1;
+            obj1 = line.from;
+            arrow_line1 = line.arrow_line1;
+            arrow_line2 = line.arrow_line2;
+        }
+
+        var obj_bb1 = obj1.getBBox();
+
+        var x1 = obj_bb1.cx.toFixed(3),
+            y1 = obj_bb1.cy.toFixed(3);
+
+        // ------------ Создаем кривую --------------
+        var path = "M" + [x1-40, y1, x1-40, y1-50].join() + "Q" + [x1-40, y1-80, x1-20, y1-80].join() + "Q" + [x1, y1-80, x1, y1-50] + "M" + [x1, y1-50, x1, y1];
+
+        // ------ Находим координаты для стрелок --------
+
+        let new_x = parseFloat(x1);
+        let new_y = parseFloat(y1-30);
+        let new_x2 = parseFloat(x1);
+        let new_y2 = parseFloat(y1-45);
+
+        let rotated_point1 = rotateV2AroundPoint(new_x2, new_y2, 20, new_x, new_y);
+        let rotated_point2 = rotateV2AroundPoint(new_x2, new_y2, -20, new_x, new_y);
+
+        let path_arrow1 = "M" + [rotated_point1.x, rotated_point1.y, new_x, new_y].join();
+        let path_arrow2 = "M" + [rotated_point2.x, rotated_point2.y, new_x, new_y].join();
+
+        // -------- Координаты для текста --------
+        let textCoords = {x: x1-40, y: y1-87};
+
+        if (line && line.line) {
+            line.line.attr({path: path});
+            arrow_line1.attr({path: path_arrow1}).attr({stroke:'#000', strokeWidth:1});
+            arrow_line2.attr({path: path_arrow2}).attr({stroke:'#000', strokeWidth:1});
+            line.text_element.attr({x: textCoords.x, y: textCoords.y});
+        }
+        else {
+            let line_draw = (this.path(path).attr({stroke: "#000", fill: "none"})).insertBefore(zero_state_node).addClass('line_object');
+
+            return {
+                line: line_draw,
+                from: obj1,
+                arrow_line1: this.path(path_arrow1).attr({stroke:'#000', strokeWidth:1}),
+                arrow_line2: this.path(path_arrow2).attr({stroke:'#000', strokeWidth:1}),
+                text_element: snap.text(textCoords.x, textCoords.y),
+                text: ''
+            };
+        }
+
+    };
+
     // -------------- Математические методы ---------------
 
     // Длина вектора |V|
@@ -308,7 +457,7 @@ Snap.plugin(function (Snap, Element, Paper, global) {
         return degrees * Math.PI / 180;
     };
 
-// Converts from radians to degrees.
+    // Converts from radians to degrees.
     Math.radiansToDegrees = function(radians) {
         return radians * 180 / Math.PI;
     };

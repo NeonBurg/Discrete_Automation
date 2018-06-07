@@ -28,6 +28,8 @@ function Controller() {
     this.OUTPUT_VARS_TOOL = 4;
     this.PLAY_TOOL = 5;
 
+    var self_connections = new Array();
+
     // ------------------ Перемещение диаграммы ------------------
     this.moveDiagram = function(dx,dy, x, y) {
         this.attr({
@@ -40,6 +42,10 @@ function Controller() {
 
         for (let i = DiagramModel.getConnectsCount(); i--;) {
             snap.create_connection(DiagramModel.getConnectByIndex(i));
+        }
+
+        for(let i = self_connections.length; i--;) {
+            //snap.create_self_connection(self_connections[i]);
         }
 
         //console.log(this.data('origTransform') + (this.data('origTransform') ? "T" : "t") + [dx, dy]);
@@ -86,9 +92,20 @@ function Controller() {
         //console.log('dxToolMoved = ' + dxToolMoved);
         if(dxToolMoved === 0) {
             let node_index = DiagramModel.getIndexByDiagramId(this.id);
-            console.log('diagram ' + node_index + ' clicked');
-            let node_data = {node_index : node_index};
-            modal_form.showModalDialog(modal_form.node_info_modal, null, node_data);
+
+            if(connect_mode) {
+                console.log('self_connect node: ' + node_index);
+                let connection = snap.create_connection(DiagramModel.getDrawableByIndex(node_index).select('.nodeCircle'), DiagramModel.getDrawableByIndex(node_index).select('.nodeCircle'));
+                DiagramModel.addConnect(this.id, this.id, connection);
+                //self_connections.push(connection);
+                let conn_data = {connectsFrom: node_index, connectsTo: node_index};
+                modal_form.showModalDialog(modal_form.connection_modal, DiagramModel.getConnectsCount()-1, conn_data);
+            }
+            else {
+                console.log('diagram ' + node_index + ' clicked');
+                let node_data = {node_index: node_index};
+                modal_form.showModalDialog(modal_form.node_info_modal, null, node_data);
+            }
         }
 
         dxToolMoved = 0;
