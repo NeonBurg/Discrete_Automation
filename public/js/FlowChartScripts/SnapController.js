@@ -285,7 +285,7 @@ function Controller() {
     }
 
     function onEnterDataSelected() {
-
+        modal_form_draggable.showModalDialog(modal_form_draggable.enter_data_modal);
     }
 
     this.chooseTool = function (index) {
@@ -470,6 +470,7 @@ function Controller() {
                 let input_variables_save = DiagramModel.getInputVariables();
                 let output_variables_save = DiagramModel.getOutputVariables();
                 let connections_data_save = DiagramModel.getConnectsData();
+                let program_variables_save = DiagramModel.getProgramVariablesData();
 
                 console.log('graph_arr = ' + JSON.stringify(graph_data_save));
                 console.log('connections_arr = ' + JSON.stringify(connections_data_save));
@@ -492,7 +493,8 @@ function Controller() {
                                     outputVariables: JSON.stringify(output_variables_save),
                                     connectionsData: JSON.stringify(connections_data_save),
                                     startNodeIndex: DiagramModel.getStartDiagramIndex(),
-                                    endNodeIndex: DiagramModel.getEndDiagramIndex()};
+                                    endNodeIndex: DiagramModel.getEndDiagramIndex(),
+                                    programVariables: JSON.stringify(program_variables_save)};
 
                 $.post("/saveProject", {pName: project_name, pData: JSON.stringify(project_data)}, onFileWriteSuccess);
             }
@@ -520,6 +522,13 @@ function Controller() {
                 let connections_data_load = JSON.parse(project_data.connectionsData);
                 let start_node_index = JSON.parse(project_data.startNodeIndex);
                 let end_node_index = JSON.parse(project_data.endNodeIndex);
+                try {
+                    let program_variables = JSON.parse(project_data.programVariables);
+                    DiagramModel.setProgramVariables(program_variables);
+                }
+                catch(error) {
+
+                }
 
                 console.log(connections_data_load);
 
@@ -646,6 +655,12 @@ function Controller() {
             graphVisualizer.hoverNode(discreteAuto.getCurrentState());
         }
         else {
+            let err_msg_list = discreteAuto.getErrorMsgs();
+            for(let err_msg_key in err_msg_list) {
+                terminal.sendToTerminal(err_msg_list[err_msg_key], terminal.ERROR_MSG_TYPE);
+            }
+            selectTool(getToolType('arrowTool'));
+            discreteAuto.clearErrorMsgs();
             discreteAuto = null;
         }
     }

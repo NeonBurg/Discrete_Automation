@@ -31,7 +31,10 @@ function DiscreteAuto() {
         let miss_outputs_err = '';
         let miss_inputs_err = '';
         // TO-DO проверку графа
-
+        if(Object.keys(graph_arr).length === 0) {
+            this.err_msg_list.push("Задан пустой граф!");
+            return false;
+        }
 
         this.input_vars = input_variables;
         this.output_vars = output_variables;

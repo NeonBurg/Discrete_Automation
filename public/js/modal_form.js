@@ -65,7 +65,7 @@ function ModalForm() {
 
     // ------------------ Создаем модальное представление ----------------------
     this.create_view = function(modal_type) {
-        var modal_dynamic_content = document.createElement('div');
+        let modal_dynamic_content = document.createElement('div');
         modal_dynamic_content.id = "modal_dynamic_content";
         switch(modal_type) {
             // --------- Представление для ввода ВХОДНЫХ переменных

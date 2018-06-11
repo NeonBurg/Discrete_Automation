@@ -29,6 +29,8 @@ var zero_state_node = null;
 
 var modal_form = new ModalForm();
 
+var modal_form_draggable = new ModalFormDraggable();
+
 
 // ---------------- Функции для создания графики -------------------
 

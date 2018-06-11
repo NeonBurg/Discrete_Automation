@@ -6,6 +6,8 @@ var DiagramModel = {
     connects: [],
     input_variables: {},
     output_variables: {},
+    program_variables: [],
+
     current_project_name: '',
     current_project_index: -1,
     start_diagram_index: -1,
@@ -238,5 +240,31 @@ var DiagramModel = {
 
     clearOutputVariables: function() {
         this.output_variables = {};
+    },
+
+    // ------- Переменные (входные) для программы ----------
+    addProgramVariable: function(variable) {
+        this.program_variables.push(variable);
+    },
+
+    setProgramVariables: function(variables_list) {
+        this.program_variables = variables_list;
+    },
+
+    deleteProgramVariable: function(index) {
+        delete this.program_variables[index];
+    },
+
+    getProgramVariablesData: function() {
+        return this.program_variables;
+    },
+
+    getProgramVariable: function(index) {
+        return this.program_variables[index];
+    },
+
+    getProgramVariableCount: function() {
+        return this.program_variables.length;
     }
-}
+
+};

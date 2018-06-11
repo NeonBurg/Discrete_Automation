@@ -5,9 +5,11 @@
     <title>Discrete Automation Editor - Test</title>
 
     <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/snap.svg.js"></script>
     <script type="text/javascript" src="js/plugin_connect.js"></script>
     <script type="text/javascript" src="js/modal_form.js"></script>
+    <script type="text/javascript" src="js/modal_form_draggable.js"></script>
     <script type="text/javascript" src="js/FlowChartScripts/SnapController.js"></script>
     <script type="text/javascript" src="js/FlowChartScripts/SnapModel.js"></script>
     <script type="text/javascript" src="js/add_variable.js"></script>
@@ -36,17 +38,8 @@
             terminal.clearTerminal();
             controller.testShow();
 
+            $( "#modal_form_draggable" ).draggable();
         });
-
-        function button_send_clicked() {
-            var terminalInput = $('#terminal-input');
-
-            terminal.sendToTerminal(terminalInput.val(), terminal.USER_MSG_TYPE);
-            controller.sendTerminalCommand(terminalInput.val());
-            //discreteAuto.sendInput(terminalInput.val());
-
-            terminalInput.val('');
-        }
 
     </script>
 </head>
@@ -61,6 +54,11 @@
         <span id="modal_close">X</span>
     </div>
     <div id="overlay"></div>
+
+    <!------------ Модальное окно Диаграммы перемещаемое ------------>
+    <div id="modal_form_draggable">
+        <span id="modal_close_draggable">X</span>
+    </div>
 
     <!-------- Главное окно визуального редактора snap.svg  ------>
     <svg id="editor" width="100%" height="100%">
