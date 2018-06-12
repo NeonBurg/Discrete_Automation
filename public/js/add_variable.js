@@ -153,21 +153,25 @@ function add_input_program_variable(key_name, key_value, add_to_model) {
     program_variable_div.addEventListener("mouseout", mouse_out_program_input, false);
 
     program_variable_div.innerHTML = key_name + ' = ' + key_value +
-                                        '<input type="button" value="x" style="width:24px; height:24px; margin-left:10px; display:inline-block; vertical-align: top; float:right;" onclick="delete_program_input('+ '\'' + program_variable_id + '\'' + ',' + '\'' + DiagramModel.getProgramVariableCount() + '\'' +');">';
+                                        '<input type="button" value="x" style="width:24px; height:24px; margin-left:10px; display:inline-block; vertical-align: top; float:right;" onclick="delete_program_input('+ '\'' + program_variable_id + '\'' + ',' + '\'' + program_variables_counter + '\'' +');">';
 
     document.getElementById("program_variables_block").appendChild(program_variable_div);
     //document.getElementById("program_variable_"+key_name).attr("onMouseOver", "mouse_over_input("+key_name+")");
 
     if(add_to_model) {
         DiagramModel.addProgramVariable(key_name);
-        program_variables_counter++;
+        //program_variables_counter++;
     }
+
+    program_variables_counter++;
 }
 
 function delete_program_input(program_input_row_id, index) {
 
+    console.log('delete_program_input: index: ' + index + ' | size = ' + DiagramModel.getProgramVariableCount());
     document.getElementById(program_input_row_id).remove();
     DiagramModel.deleteProgramVariable(index);
+    console.log('size = ' + DiagramModel.getProgramVariableCount());
 }
 
 function mouse_over_program_input() {

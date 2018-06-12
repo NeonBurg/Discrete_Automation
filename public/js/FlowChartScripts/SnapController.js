@@ -29,6 +29,9 @@ function Controller() {
     this.PLAY_TOOL = 5;
     this.ENTER_DATA_TOOL = 6;
 
+    var discrete_auto_started = false;
+    var program_timer;
+
     // ------------------ Перемещение диаграммы ------------------
     this.moveDiagram = function(dx,dy, x, y) {
         this.attr({
@@ -151,36 +154,28 @@ function Controller() {
 
         console.log('select_tool: ' + index + ' | selected_tool_index = ' + selected_tool_index);
 
-        if(selected_tool_index !== index) {
+        if(selected_tool_index !== index || index === controller.PLAY_TOOL) {
             let toolDrawable = null;
-
             switch (index) {
                 case controller.ARROW_TOOL:
-                    onArrowToolSelected();
                     toolDrawable = snap.select('#arrowTool');
                     break;
                 case controller.CONNECT_TOOL:
-                    onConnectToolSelected();
                     toolDrawable = snap.select('#connectTool');
                     break;
                 case controller.SAVE_TOOL:
-                    onSaveToolSelected();
                     toolDrawable = snap.select('#saveTool');
                     break;
                 case controller.INPUT_VARS_TOOL:
-                    onInputVarsSelected();
                     toolDrawable = snap.select('#variablesTool');
                     break;
                 case controller.OUTPUT_VARS_TOOL:
-                    onOutputVarsSelected();
                     toolDrawable = snap.select('#outputsTool');
                     break;
                 case controller.PLAY_TOOL:
-                    onPlayToolSelected();
                     toolDrawable = snap.select('#playTool');
                     break;
                 case controller.ENTER_DATA_TOOL:
-                    onEnterDataSelected();
                     toolDrawable = snap.select('#enterDataTool');
                     break;
             }
@@ -188,11 +183,36 @@ function Controller() {
             if (selection_object) {
                 unselectTool(selected_tool_index);
             }
+
             let t_x = toolDrawable.getBBox().x;
             let t_y = toolDrawable.getBBox().y;
             selection_object = snap.rect(t_x - 9, t_y - 4, 49, 39).attr({fill: "#b5b5b5"});
             selection_object.after(toolDrawable);
             selected_tool_index = index;
+
+            switch (index) {
+                case controller.ARROW_TOOL:
+                    onArrowToolSelected();
+                    break;
+                case controller.CONNECT_TOOL:
+                    onConnectToolSelected();
+                    break;
+                case controller.SAVE_TOOL:
+                    onSaveToolSelected();
+                    break;
+                case controller.INPUT_VARS_TOOL:
+                    onInputVarsSelected();
+                    break;
+                case controller.OUTPUT_VARS_TOOL:
+                    onOutputVarsSelected();
+                    break;
+                case controller.PLAY_TOOL:
+                    onPlayToolSelected();
+                    break;
+                case controller.ENTER_DATA_TOOL:
+                    onEnterDataSelected();
+                    break;
+            }
         }
     }
 
@@ -260,7 +280,9 @@ function Controller() {
     // ----------- Функции выполняемые при выборе инструмента --------------
 
     function onArrowToolSelected() {
+        console.log('onArrowSelected: discrete_auto_started = ' + discrete_auto_started);
         //if(connect_mode) connectModeOff();
+        if(discrete_auto_started) stopDiscreteAuto();
     }
 
     // Выбран инструмент 'Соединение'
@@ -281,7 +303,11 @@ function Controller() {
     }
 
     function onPlayToolSelected() {
-        startDiscreteAuto();
+        console.log('onPlayToolSelected: discrete_auto_started = ' + discrete_auto_started);
+        if(!discrete_auto_started)  startDiscreteAuto();
+        else {
+            stopDiscreteAuto();
+        }
     }
 
     function onEnterDataSelected() {
@@ -302,7 +328,7 @@ function Controller() {
                 connectModeOff();
                 break;
             case 5:
-                stopDiscreteAuto();
+                //stopDiscreteAuto();
                 break;
         }
 
@@ -653,23 +679,27 @@ function Controller() {
             terminal.sendToTerminal('Дискретный автомат был успешно запущен', terminal.SUCCESS_MSG_TYPE);
             terminal.sendToTerminal('Введите входное значение:');
             graphVisualizer.hoverNode(discreteAuto.getCurrentState());
+            discrete_auto_started = true;
+            return true;
         }
         else {
             let err_msg_list = discreteAuto.getErrorMsgs();
             for(let err_msg_key in err_msg_list) {
                 terminal.sendToTerminal(err_msg_list[err_msg_key], terminal.ERROR_MSG_TYPE);
             }
-            selectTool(getToolType('arrowTool'));
+            selectTool(0);
             discreteAuto.clearErrorMsgs();
             discreteAuto = null;
+            return false;
         }
     }
 
     function stopDiscreteAuto() {
 
-        console.log('stopDiscreteAuto');
+        //console.log('stopDiscreteAuto');
 
         if(discreteAuto !== null) {
+            console.log('stopDiscreteAuto');
             let playTool = snap.select('#playTool');
             let t_x = playTool.getBBox().x;
             let t_y = playTool.getBBox().y;
@@ -680,6 +710,11 @@ function Controller() {
 
             discreteAuto.stop();
             graphVisualizer.clearHoverNode();
+            //discreteAuto = null;
+            discrete_auto_started = false;
+            terminal.sendToTerminal("Дискретный автомат остановлен", terminal.WARNING_MSG_TYPE);
+            selectTool(0);
+            controller.stop_program();
         }
     }
 
@@ -708,6 +743,99 @@ function Controller() {
                 discreteAuto.clearErrorMsgs();
             }
         }
+    };
+
+    this.send_interval_command = function(command_value, current_index, interval) {
+
+        let new_current_index = DiagramModel.getProgramVariableKeyByNum(current_index);
+        terminal.sendToTerminal(command_value + ' = ' +DiagramModel.getInputVariableValue(command_value));
+        controller.sendTerminalCommand(DiagramModel.getInputVariableValue(command_value));
+        document.getElementById("state_num").innerHTML = 'a' + discreteAuto.getCurrentState();
+        document.getElementById("state_status").innerHTML = discreteAuto.getCurrentOutputValue();
+        console.log('command_value = ' + command_value + ' | c_index = ' + current_index + ' | n_index = ' + (current_index+1) + ' | new_current_index = '+ new_current_index);
+        let next_index = current_index+1;
+
+        let p_var_row_id = "program_variable_" + new_current_index;
+        console.log('p_var_row_id = ' + p_var_row_id);
+        document.getElementById(p_var_row_id).style.backgroundColor = "#e2e2e2";
+
+        if(current_index > 0) {
+            let p_var_row_id_old = "program_variable_" + DiagramModel.getProgramVariableKeyByNum((current_index-1));
+            console.log('p_var_row_id_old:' + p_var_row_id_old);
+            document.getElementById(p_var_row_id_old).style.backgroundColor = "#ffffff";
+        }
+
+        if(DiagramModel.getProgramVariableCount() > next_index) {
+            //setTimeout("controller.send_interval_command('"+DiagramModel.getProgramVariable(next_index)+"', "+next_index+", '"+interval+"')", interval);
+            console.log('byNum = ' + DiagramModel.getProgramVariableByNum(next_index));
+            program_timer = setTimeout("controller.send_interval_command('"+DiagramModel.getProgramVariableByNum(next_index)+"', "+next_index+", '"+interval+"')", interval);
+        }
+        else {
+            document.getElementById("launch_interval").disabled = false;
+            document.getElementById("terminal-input").disabled = false;
+            document.getElementById("start_program_button").value = "Запустить";
+        }
+
+    };
+
+    this.start_program = function(instant_run) {
+
+        if(!discrete_auto_started) {
+            let launch_interval_select = document.getElementById("launch_interval");
+            let launch_interval = launch_interval_select.options[launch_interval_select.selectedIndex].value;
+            let msec_interval = launch_interval * 1000;
+            console.log("msec_interval = " + msec_interval);
+            console.log('launch_interval = ' + launch_interval);
+
+            launch_interval_select.disabled = true;
+            document.getElementById("terminal-input").disabled = true;
+
+            if (DiagramModel.getProgramVariableCount() !== 0) {
+
+                let p_var_row_id_last = "program_variable_" + (DiagramModel.getLastProgramVariableKey());
+                console.log('p_var_row_id_last = ' + p_var_row_id_last);
+                document.getElementById(p_var_row_id_last).style.backgroundColor = "#ffffff";
+
+                let program_variables = DiagramModel.getProgramVariablesData();
+                selectTool(controller.PLAY_TOOL);
+
+                if (discrete_auto_started) {
+
+                    document.getElementById("state_num").innerHTML = 'a' + discreteAuto.getCurrentState();
+                    document.getElementById("state_status").innerHTML = discreteAuto.getCurrentOutputValue();
+
+                    if (instant_run) {
+                        for (let index in program_variables) {
+                            terminal.sendToTerminal(program_variables[index] + ' = ' + DiagramModel.getInputVariableValue(program_variables[index]));
+                            controller.sendTerminalCommand(DiagramModel.getInputVariableValue(program_variables[index]));
+                        }
+                        document.getElementById("state_num").innerHTML = 'a' + discreteAuto.getCurrentState();
+                        document.getElementById("state_status").innerHTML = discreteAuto.getCurrentOutputValue();
+                    } else {
+                        document.getElementById("start_program_button").value = "Остановить";
+                        launch_interval_select.disabled = true;
+                        document.getElementById("terminal-input").disabled = true;
+                        //setTimeout("controller.send_interval_command('" + program_variables[0] + "', 0, '" + msec_interval + "')", msec_interval);
+                        program_timer = setTimeout("controller.send_interval_command('" + DiagramModel.getProgramVariableByNum(0) + "', 0, '" + msec_interval + "')", msec_interval);
+                    }
+                }
+            }
+            else {
+                terminal.sendToTerminal("Введена пустая последовательность символов для программы!", terminal.ERROR_MSG_TYPE);
+            }
+        }
+        else {
+            controller.stop_program();
+        }
+
+    };
+
+    this.stop_program = function() {
+        if(program_timer) clearTimeout(program_timer);
+        document.getElementById("start_program_button").value = "Запустить";
+        document.getElementById("terminal-input").disabled = false;
+        document.getElementById("launch_interval").disabled = false;
+        if(discrete_auto_started) stopDiscreteAuto();
     };
     // -----------------------------------------------------------------
 

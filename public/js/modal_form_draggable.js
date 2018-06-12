@@ -22,6 +22,7 @@ function ModalFormDraggable() {
         controller.selectTool(0);
 
         remove_view();
+        program_variables_counter = 0;
 
         $('#modal_form_draggable')
             .animate({opacity: 0, top: '45%'}, 200,  // плaвнo меняем прoзрaчнoсть нa 0 и oднoвременнo двигaем oкнo вверх
@@ -47,9 +48,16 @@ function ModalFormDraggable() {
         switch (modal_type) {
             // --------- Представление для ввода ВХОДНЫХ переменных
             case this.enter_data_modal:
-                modal_dynamic_content.innerHTML = 'Ввод программы:<br>'+
+                modal_dynamic_content.innerHTML = 'Ввод программы:<br>' +
                                                     '<div id="input_variables_program" style="width:100%;"></div>' +
-                                                    '<div style="min-height:40px; width:100%; margin-right:5px; margin-top:10px; border:1px solid gray; cursor:default;" id="program_variables_block"></div>';
+                                                    '<div style="min-height:40px; width:100%; margin-right:5px; margin-top:10px; border:1px solid gray; cursor:default;" id="program_variables_block"></div>' +
+                                                    '<div style="width:100%; margin-top:10px; margin-right:10px;"><input type="button" id="start_program_button" onclick="controller.start_program(false)" value="Запустить" style="height:25px;">' +
+                                                    '<div style="display:inline-block; float:right;">Интервал (сек): ' +
+                                                    '<select id="launch_interval"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>' +
+                                                    '</div></div>' +
+                                                    '<input type="button" onclick="controller.start_program(true)" value="Быстрый запуск" style="height:25px; margin-top:10px;">' +
+                                                    '<div style="margin-top:10px;">Состояние: <div id="state_num" style="display: inline-block;"></div></div>' +
+                                                    '<div>Выход: <div id="state_status" style="display: inline-block;"></div></div>';
 
                 document.getElementById('modal_form_draggable').appendChild(modal_dynamic_content);
 

@@ -84,7 +84,6 @@ function DiscreteAuto() {
     };
 
     this.stop = function() {
-        this.currentState = -1;
         this.is_started = false;
     };
 

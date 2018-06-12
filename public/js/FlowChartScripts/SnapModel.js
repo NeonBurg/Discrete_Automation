@@ -253,6 +253,9 @@ var DiagramModel = {
 
     deleteProgramVariable: function(index) {
         delete this.program_variables[index];
+        //this.program_variables.splice(index, 1);
+        //this.
+        //console.log('deleteProgVar: ' + index);
     },
 
     getProgramVariablesData: function() {
@@ -264,7 +267,48 @@ var DiagramModel = {
     },
 
     getProgramVariableCount: function() {
-        return this.program_variables.length;
+        //return this.program_variables.length;
+        let count = 0;
+
+        for(let index in this.program_variables) {
+            if(this.program_variables[index]) count++;
+        }
+
+        return count;
+    },
+
+    getLastProgramVariableKey: function() {
+
+        let last_index = 0;
+        for(let index in this.program_variables) {
+            if(this.program_variables[index]) last_index = index;
+        }
+        return last_index;
+
+    },
+
+    getProgramVariableByNum: function(num_index) {
+
+        let count = 0;
+
+        for(let index in this.program_variables) {
+            if(this.program_variables[index]) {
+                if(count === num_index) return this.program_variables[index];
+                count++;
+            }
+        }
+    },
+
+    getProgramVariableKeyByNum: function(num_index) {
+
+        let count = 0;
+
+        for(let index in this.program_variables) {
+            if(this.program_variables[index]) {
+                if(count === num_index) return index;
+                count++;
+            }
+        }
     }
 
 };
